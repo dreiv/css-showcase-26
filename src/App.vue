@@ -11,6 +11,11 @@
       <RouterLink to="/auto-grow-textarea">Auto-grow textarea</RouterLink>
       <RouterLink to="/position-try-fallbacks">Position-try fallbacks</RouterLink>
       <RouterLink to="/styled-select">Styled select</RouterLink>
+      <RouterLink to="/popover-playground">Popover playground</RouterLink>
+      <RouterLink to="/modal">Modal</RouterLink>
+      <RouterLink to="/aspect-ratio">aspect-ratio</RouterLink>
+      <RouterLink to="/container-queries">Container queries</RouterLink>
+      <RouterLink to="/has-selector">:has()</RouterLink>
     </nav>
   </header>
 

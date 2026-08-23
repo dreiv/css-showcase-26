@@ -33,6 +33,31 @@ const router = createRouter({
       name: 'styled-select',
       component: () => import('../views/StyledSelectView.vue'),
     },
+    {
+      path: '/popover-playground',
+      name: 'popover-playground',
+      component: () => import('../views/PopoverPlaygroundView.vue'),
+    },
+    {
+      path: '/modal',
+      name: 'modal',
+      component: () => import('../views/ModalView.vue'),
+    },
+    {
+      path: '/aspect-ratio',
+      name: 'aspect-ratio',
+      component: () => import('../views/AspectRatioView.vue'),
+    },
+    {
+      path: '/container-queries',
+      name: 'container-queries',
+      component: () => import('../views/ContainerQueriesView.vue'),
+    },
+    {
+      path: '/has-selector',
+      name: 'has-selector',
+      component: () => import('../views/HasSelectorView.vue'),
+    },
   ],
 })
 

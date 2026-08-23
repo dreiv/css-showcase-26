@@ -37,6 +37,36 @@ const demos: Demo[] = [
     technique: 'appearance: none',
     description: 'A restyled native <select>, using only the widely-supported technique.',
   },
+  {
+    name: 'Popover playground',
+    route: '/popover-playground',
+    technique: 'Popover API + anchor positioning',
+    description: 'Drag the anchor, pick a preferred side — the popover follows and self-flips.',
+  },
+  {
+    name: 'Modal',
+    route: '/modal',
+    technique: 'command / commandfor',
+    description: 'Declarative dialog triggering with the Invoker Commands API — no JS handlers.',
+  },
+  {
+    name: 'aspect-ratio',
+    route: '/aspect-ratio',
+    technique: 'aspect-ratio',
+    description: 'Locked-ratio boxes, media embeds and object-fit cropping, no padding hack.',
+  },
+  {
+    name: 'Container queries',
+    route: '/container-queries',
+    technique: 'container-type + @container',
+    description: "A card that reflows based on its own container's width, not the viewport.",
+  },
+  {
+    name: ':has() selector',
+    route: '/has-selector',
+    technique: ':has()',
+    description: 'Five patterns: rating stars, live validation, cards, quantity queries, content.',
+  },
 ]
 </script>
 
