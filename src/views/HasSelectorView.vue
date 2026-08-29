@@ -28,7 +28,7 @@ function removeItem() {
   <fieldset class="rating" aria-label="Rate this demo">
     <template v-for="n in [1, 2, 3, 4, 5]" :key="n">
       <input type="radio" name="rating" :id="`star-${n}`" :value="n" class="star-input" />
-      <label :for="`star-${n}`" class="star" :aria-label="`${n} star${n > 1 ? 's' : ''}`">★</label>
+      <label :for="`star-${n}`" class="star" :aria-label="`${n} star${n > 1 ? 's' : ''}`"></label>
     </template>
   </fieldset>
   <pre><code>/* light up this star if it's hovered, or if any star after it in the
@@ -172,9 +172,18 @@ pre {
   transition: color 0.1s ease;
 }
 
+.star::before {
+  content: '★';
+}
+
 .star:hover,
 .star:has(~ .star:hover) {
   color: var(--accent);
+}
+
+.star:hover::before,
+.star:has(~ .star:hover)::before {
+  content: '☆';
 }
 
 .star:has(~ .star-input:checked),

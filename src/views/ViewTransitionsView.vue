@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, useTemplateRef } from 'vue'
+import { nextTick, ref, useTemplateRef, type ComponentPublicInstance } from 'vue'
 import SupportBadge from '@/components/SupportBadge.vue'
 
 const hasViewTransitions = typeof document !== 'undefined' && 'startViewTransition' in document
@@ -38,11 +38,11 @@ function thumbBackground(color: string) {
 const itemEls = new Map<number, HTMLElement>()
 const thumbEls = new Map<number, HTMLElement>()
 
-function setItemEl(id: number, el: Element | null) {
-  if (el) itemEls.set(id, el as HTMLElement)
+function setItemEl(id: number, el: Element | ComponentPublicInstance | null) {
+  if (el instanceof HTMLElement) itemEls.set(id, el)
 }
-function setThumbEl(id: number, el: Element | null) {
-  if (el) thumbEls.set(id, el as HTMLElement)
+function setThumbEl(id: number, el: Element | ComponentPublicInstance | null) {
+  if (el instanceof HTMLElement) thumbEls.set(id, el)
 }
 
 function setLayout(next: Layout) {
