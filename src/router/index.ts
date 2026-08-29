@@ -16,7 +16,7 @@ const router = createRouter({
     {
       path: "/data-table",
       name: "data-table",
-      component: () => import("../views/DataTableView.vue"),
+      component: () => import("../features/data-table/DataTableView.vue"),
     },
     {
       path: "/auto-grow-textarea",
