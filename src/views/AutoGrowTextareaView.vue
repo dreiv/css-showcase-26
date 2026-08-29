@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import SupportBadge from '@/components/SupportBadge.vue'
 
-const text = ref(
-  "Type here — the box grows with the content.\nTry pasting a few paragraphs in.",
-)
+const hasFieldSizing = typeof CSS !== 'undefined' && CSS.supports('field-sizing', 'content')
+
+const text = ref('Type here — the box grows with the content.\nTry pasting a few paragraphs in.')
 </script>
 
 <template>
   <h2>Auto-grow textarea</h2>
   <p class="description">
-    The 2026 solution is one line: <code>field-sizing: content</code>. No JS resize listener, no
-    hidden mirror &lt;div&gt; measuring scrollHeight.
+    The one-line solution: <code>field-sizing: content</code>. No JS resize listener, no hidden
+    mirror &lt;div&gt; measuring scrollHeight — where it's supported.
   </p>
+
+  <SupportBadge :supported="hasFieldSizing" feature="field-sizing: content" />
 
   <div class="compare">
     <div class="col">
@@ -30,6 +33,14 @@ const text = ref(
   min-height: 2.5lh;
   max-height: 12lh;
 }</code></pre>
+
+  <p class="support-note">
+    <code>field-sizing</code> has "limited availability" per MDN — it is <strong>not</strong>
+    Baseline. Chromium shipped it first; Firefox and Safari support is still catching up. The left
+    column above only shows the effect if the badge reads "supported" — otherwise it's silently
+    behaving like the plain textarea on the right, which is the safe, non-breaking way this feature
+    fails: no error, no layout shift, just no auto-grow.
+  </p>
 </template>
 
 <style scoped>
@@ -64,5 +75,10 @@ textarea {
 .fixed {
   height: 5lh;
   resize: vertical;
+}
+
+.support-note {
+  color: color-mix(in srgb, currentColor 65%, transparent);
+  font-size: 0.85em;
 }
 </style>

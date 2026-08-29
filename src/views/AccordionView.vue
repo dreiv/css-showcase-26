@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import SupportBadge from '@/components/SupportBadge.vue'
+
+const hasDetailsContent = typeof CSS !== 'undefined' && CSS.supports('selector(::details-content)')
+
 const items = [
   {
     q: 'Does this need any JavaScript?',
@@ -19,17 +23,14 @@ const items = [
   <h2>Pure CSS accordion</h2>
   <p class="description">
     Built entirely from <code>&lt;details&gt;</code> / <code>&lt;summary&gt;</code>. The animated
-    expand/collapse comes from <code>::details-content { grid-template-rows: 0fr → 1fr }</code> —
-    no JS.
+    expand/collapse comes from <code>::details-content { grid-template-rows: 0fr → 1fr }</code> — no
+    JS.
   </p>
 
+  <SupportBadge :supported="hasDetailsContent" feature="::details-content" />
+
   <div class="accordion">
-    <details
-      v-for="(item, i) in items"
-      :key="item.q"
-      class="accordion-item"
-      :open="i === 0"
-    >
+    <details v-for="(item, i) in items" :key="item.q" class="accordion-item" :open="i === 0">
       <summary class="summary">
         <span class="nr">{{ String(i + 1).padStart(2, '0') }}</span>
         {{ item.q }}

@@ -1,4 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import SupportBadge from '@/components/SupportBadge.vue'
+
+const hasInvokerCommands =
+  typeof HTMLButtonElement !== 'undefined' && 'command' in HTMLButtonElement.prototype
+</script>
 
 <template>
   <h2>Triggering a modal, the 2026 way</h2>
@@ -16,10 +21,10 @@
     <code>&lt;script&gt;</code> block.
   </p>
 
+  <SupportBadge :supported="hasInvokerCommands" feature="command / commandfor" />
+
   <div class="demo-row">
-    <button type="button" command="show-modal" commandfor="confirm-dialog">
-      Delete project…
-    </button>
+    <button type="button" command="show-modal" commandfor="confirm-dialog">Delete project…</button>
 
     <button type="button" command="show-modal" commandfor="info-dialog">Show details</button>
   </div>
@@ -70,9 +75,11 @@
 &lt;/dialog&gt;</code></pre>
 
   <p class="support-note">
-    Chromium-only as of writing. Elsewhere the buttons are inert no-ops — pair with a tiny
-    progressive-enhancement JS fallback (feature-detect <code>"command" in HTMLButtonElement.prototype</code>)
-    if you need it everywhere today.
+    <code>command</code>/<code>commandfor</code> shipped in Chromium first, so the badge above may
+    read differently depending on which browser opened this page — if it's unsupported, the buttons
+    above are inert no-ops. Pair with a tiny progressive-enhancement JS fallback (feature-detect
+    <code>"command" in HTMLButtonElement.prototype</code>, same check the badge uses) if you need
+    this working everywhere today.
   </p>
 </template>
 

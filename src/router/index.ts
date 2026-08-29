@@ -58,6 +58,41 @@ const router = createRouter({
       name: 'has-selector',
       component: () => import('../views/HasSelectorView.vue'),
     },
+    {
+      path: '/scroll-animations',
+      name: 'scroll-animations',
+      component: () => import('../views/ScrollAnimationsView.vue'),
+    },
+    {
+      path: '/contrast-color',
+      name: 'contrast-color',
+      component: () => import('../views/ContrastColorView.vue'),
+    },
+    {
+      path: '/temporal',
+      name: 'temporal',
+      component: () => import('../views/TemporalView.vue'),
+    },
+    {
+      path: '/view-transitions',
+      name: 'view-transitions',
+      component: () => import('../views/ViewTransitionsView.vue'),
+    },
+    {
+      path: '/relative-color',
+      name: 'relative-color',
+      component: () => import('../views/RelativeColorView.vue'),
+    },
+    {
+      path: '/iterator-helpers',
+      name: 'iterator-helpers',
+      component: () => import('../views/IteratorHelpersView.vue'),
+    },
+    {
+      path: '/top-level-await',
+      name: 'top-level-await',
+      component: () => import('../views/TopLevelAwaitView.vue'),
+    },
   ],
 })
 
