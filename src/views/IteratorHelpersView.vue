@@ -7,18 +7,14 @@ const IteratorCtor = (globalThis as any).Iterator
 const hasIteratorHelpers =
   typeof IteratorCtor !== 'undefined' && typeof IteratorCtor.prototype?.map === 'function'
 
-// Infinite generator — stays lazy, so this never fully evaluates.
-function* naturals() {
-  let n = 1
-  while (true) yield n++
-}
-
 const takeCount = ref(8)
 
-const result = computed(() => {
+const helperResult = computed(() => {
   if (!hasIteratorHelpers) return []
-  // Cast: TS's default lib doesn't ship the esnext.iterator types yet, so the
-  // Iterator.prototype.map/filter/take declarations aren't visible here.
+  function* naturals() {
+    let n = 1
+    while (true) yield n++
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const naturalsIter = naturals() as any
   return naturalsIter
@@ -28,7 +24,6 @@ const result = computed(() => {
     .toArray()
 })
 
-// Manual, pre-Iterator-helpers version of the same computation, for comparison.
 function manualVersion(limit: number) {
   const out: number[] = []
   let n = 1
@@ -41,6 +36,16 @@ function manualVersion(limit: number) {
 }
 
 const manualResult = computed(() => manualVersion(takeCount.value))
+
+const candidatesChecked = computed(() => {
+  let n = 0
+  let found = 0
+  while (found < takeCount.value) {
+    n++
+    if ((n * n) % 2 === 0) found++
+  }
+  return n
+})
 </script>
 
 <template>
@@ -49,8 +54,6 @@ const manualResult = computed(() => manualVersion(takeCount.value))
     <code>.map()</code>, <code>.filter()</code>, <code>.take()</code>, <code>.drop()</code> and
     friends, now built directly onto <code>Iterator.prototype</code> — so they work on
     <em>any</em> iterator, including infinite generators, staying fully lazy the whole way through.
-    Nothing below ever builds an intermediate array; each value is pulled through the whole chain
-    one at a time, only as far as <code>.take()</code> asks for.
   </p>
 
   <SupportBadge :supported="hasIteratorHelpers" feature="Iterator.prototype.map" />
@@ -63,23 +66,42 @@ const manualResult = computed(() => manualVersion(takeCount.value))
     </label>
   </div>
 
-  <div class="result-row">
-    <span class="chip" v-for="n in hasIteratorHelpers ? result : manualResult" :key="n">{{
-      n
-      }}</span>
+  <p class="lazy-note">
+    Checked <strong>{{ candidatesChecked }}</strong> numbers from an infinite generator to find
+    those <strong>{{ takeCount }}</strong> — not one more. Move the slider and watch that number
+    change; neither version below ever materializes the full range.
+  </p>
+
+  <div class="comparison">
+    <div class="approach">
+      <span class="approach-label">Iterator helpers</span>
+      <div class="result-row">
+        <template v-if="hasIteratorHelpers">
+          <span class="chip" v-for="n in helperResult" :key="n">{{ n }}</span>
+        </template>
+        <span v-else class="chip chip--muted">Unsupported in this browser — see manual version below</span>
+      </div>
+    </div>
+
+    <div class="approach">
+      <span class="approach-label">Manual loop (what you'd write without them)</span>
+      <div class="result-row">
+        <span class="chip chip--muted" v-for="n in manualResult" :key="n">{{ n }}</span>
+      </div>
+    </div>
   </div>
 
   <pre><code>function* naturals() {
-  let n = 1
-  while (true) yield n++          // infinite — this never finishes on its own
-}
+    let n = 1
+    while (true) yield n++ // infinite — never finishes on its own
+    }
 
-const firstEightEvenSquares = naturals()
-  .map(n =&gt; n * n)
-  .filter(n =&gt; n % 2 === 0)
-  .take(8)
-  .toArray();
-// -&gt; [4, 16, 36, 64, 100, 144, 196, 256]</code></pre>
+    naturals()
+    .map(n =&gt; n * n)
+    .filter(n =&gt; n % 2 === 0)
+    .take(8)
+    .toArray();
+    // -&gt; [4, 16, 36, 64, 100, 144, 196, 256]</code></pre>
 
   <h2>What this replaces</h2>
   <p class="description">
@@ -88,20 +110,15 @@ const firstEightEvenSquares = naturals()
   </p>
 
   <pre><code>function manualVersion(limit) {
-  const out = [];
-  let n = 1;
-  while (out.length &lt; limit) {
+    const out = [];
+    let n = 1;
+    while (out.length &lt; limit) {
     const squared = n * n;
     if (squared % 2 === 0) out.push(squared);
     n++;
-  }
-  return out;
-}</code></pre>
-
-  <p class="description">
-    Both versions above compute the identical sequence — <code>{{ manualResult.join(', ') }}</code>
-    — the chained version just reads as what it's doing instead of how.
-  </p>
+    }
+    return out;
+    }</code></pre>
 
   <p class="support-note">
     Baseline newly available across Chrome, Edge, Firefox and Safari as of 2025 — one of the
@@ -117,7 +134,7 @@ h2:not(:first-child) {
 }
 
 .controls {
-  margin-block-end: 1.25rem;
+  margin-block-end: 1rem;
 }
 
 .controls label {
@@ -132,11 +149,34 @@ h2:not(:first-child) {
   width: 4.5rem;
 }
 
+.lazy-note {
+  font-size: 0.85em;
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  margin-block-end: 1.25rem;
+}
+
+.comparison {
+  display: grid;
+  gap: 1rem;
+  margin-block-end: 1.5rem;
+}
+
+.approach {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.approach-label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: color-mix(in srgb, currentColor 75%, transparent);
+}
+
 .result-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-block-end: 1.5rem;
 }
 
 .chip {
@@ -146,6 +186,10 @@ h2:not(:first-child) {
   font-family: ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.85em;
   background: var(--surface);
+}
+
+.chip--muted {
+  opacity: 0.6;
 }
 
 .support-note {

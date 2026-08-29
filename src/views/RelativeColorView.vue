@@ -6,6 +6,36 @@ const hasRelativeColor =
   typeof CSS !== 'undefined' && CSS.supports('color', 'oklch(from red l c h)')
 
 const base = ref('#3562e6')
+
+interface ScaleStep {
+  label: string
+  mult: number | null
+}
+
+const scaleSteps: ScaleStep[] = [
+  { label: '50', mult: 1.7 },
+  { label: '100', mult: 1.45 },
+  { label: '200', mult: 1.25 },
+  { label: '300', mult: 1.1 },
+  { label: '400', mult: 1.02 },
+  { label: '500', mult: null },
+  { label: '600', mult: 0.85 },
+  { label: '700', mult: 0.7 },
+  { label: '800', mult: 0.55 },
+  { label: '900', mult: 0.4 },
+]
+
+interface AccentStep {
+  label: string
+  shift: number
+}
+
+const accentSteps: AccentStep[] = [
+  { label: 'Primary', shift: 0 },
+  { label: 'Secondary', shift: 120 },
+  { label: 'Tertiary', shift: -120 },
+  { label: 'Complementary', shift: 180 },
+]
 </script>
 
 <template>
@@ -25,41 +55,58 @@ const base = ref('#3562e6')
     </label>
   </div>
 
-  <div class="ramp" :style="{ '--base': base }">
-    <div class="chip chip--l20">
-      <span>lighter</span>
-      <code>l + 0.2</code>
-    </div>
-    <div class="chip chip--base">
-      <span>base</span>
-      <code>{{ base }}</code>
-    </div>
-    <div class="chip chip--l-20">
-      <span>darker</span>
-      <code>l − 0.2</code>
-    </div>
-    <div class="chip chip--desat">
-      <span>desaturated</span>
-      <code>c × 0.25</code>
-    </div>
-    <div class="chip chip--alpha">
-      <span>50% alpha</span>
-      <code>alpha 0.5</code>
-    </div>
-  </div>
+  <div class="demo-root" :style="{ '--base': base }">
+    <h2>A full shade scale from one token</h2>
+    <p class="description">
+      Design systems usually hand-author a 50–900 scale per color. Here every step is the same
+      base color with only its lightness multiplied — pick a new base above and the whole scale
+      updates.
+    </p>
 
-  <pre><code>.chip--l20 {
-  background: oklch(from var(--base) calc(l + 0.2) c h);
-}
-.chip--l-20 {
-  background: oklch(from var(--base) calc(l - 0.2) c h);
-}
-.chip--desat {
-  background: oklch(from var(--base) l calc(c * 0.25) h);
-}
-.chip--alpha {
-  background: oklch(from var(--base) l c h / 0.5);
+    <div class="scale-grid">
+      <div v-for="s in scaleSteps" :key="s.label" class="scale-step" :class="{ 'scale-step--base': s.mult === null }"
+        :style="s.mult !== null ? { '--mult': s.mult } : {}">
+        <span>{{ s.label }}</span>
+      </div>
+    </div>
+
+    <pre><code>.scale-step {
+  background: oklch(from var(--base) calc(l * var(--mult, 1)) c h);
 }</code></pre>
+
+    <h2>Theme accents from one hue</h2>
+    <p class="description">
+      A secondary and tertiary accent, plus a complementary color for callouts — all rotated off
+      the same base hue instead of picked separately and hoped to match.
+    </p>
+
+    <div class="accent-grid">
+      <div v-for="a in accentSteps" :key="a.label" class="accent-chip" :style="{ '--shift': a.shift }">
+        <span>{{ a.label }}</span>
+        <code>h {{ a.shift >= 0 ? '+' : '' }}{{ a.shift }}</code>
+      </div>
+    </div>
+
+    <pre><code>.accent-secondary { background: oklch(from var(--base) l c calc(h + 120)); }
+.accent-tertiary { background: oklch(from var(--base) l c calc(h - 120)); }</code></pre>
+
+    <h2>Button states, derived not duplicated</h2>
+    <p class="description">
+      One base color, no separate <code>--button-hover</code> / <code>--button-active</code>
+      tokens to keep in sync. Hover and click the button below.
+    </p>
+
+    <div class="demo-button-row">
+      <button type="button" class="demo-button">Save changes</button>
+      <button type="button" class="demo-button" disabled>Disabled</button>
+    </div>
+
+    <pre><code>.demo-button:hover  { background: oklch(from var(--base) calc(l * 1.15) c h); }
+.demo-button:active { background: oklch(from var(--base) calc(l * 0.85) c h); }
+.demo-button:disabled {
+  background: oklch(from var(--base) l calc(c * 0.2) h / 0.5);
+}</code></pre>
+  </div>
 
   <h2>Why this beats <code>color-mix()</code> for tints/shades</h2>
   <p class="description">
@@ -101,55 +148,95 @@ input[type='color'] {
   padding: 0.2rem;
 }
 
-.ramp {
+.scale-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: 0.5rem;
+  margin-block-end: 1.5rem;
+}
+
+.scale-step {
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: flex-end;
+  padding: 0.4rem;
+  font-size: 0.75em;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-weight: 600;
+
+  background: oklch(from var(--base) calc(l * var(--mult, 1)) c h);
+  color: contrast-color(oklch(from var(--base) calc(l * var(--mult, 1)) c h));
+}
+
+.scale-step--base {
+  border-color: currentColor;
+}
+
+.accent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 0.75rem;
   margin-block-end: 1.5rem;
 }
 
-.chip {
-  aspect-ratio: 1;
+.accent-chip {
+  aspect-ratio: 4 / 3;
   border-radius: var(--radius);
-  border: 1px solid var(--border-strong);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 0.15rem;
   padding: 0.6rem;
-  font-size: 0.75em;
+  font-size: 0.8em;
   font-family: ui-monospace, Menlo, Consolas, monospace;
+
+  background: oklch(from var(--base) l c calc(h + var(--shift)));
+  color: contrast-color(oklch(from var(--base) l c calc(h + var(--shift))));
 }
 
-.chip span {
+.accent-chip span {
   font-family: initial;
-  font-size: 0.9em;
+  font-size: 0.95em;
   font-weight: 600;
 }
 
-.chip--l20 {
-  background: oklch(from var(--base) calc(l + 0.2) c h);
-  color: contrast-color(oklch(from var(--base) calc(l + 0.2) c h));
+.demo-button-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-block-end: 1.5rem;
 }
 
-.chip--base {
+.demo-button {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.65rem 1.4rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
   background: var(--base);
   color: contrast-color(var(--base));
 }
 
-.chip--l-20 {
-  background: oklch(from var(--base) calc(l - 0.2) c h);
-  color: contrast-color(oklch(from var(--base) calc(l - 0.2) c h));
+.demo-button:hover:not(:disabled) {
+  background: oklch(from var(--base) calc(l * 1.15) c h);
+  color: contrast-color(oklch(from var(--base) calc(l * 1.15) c h));
 }
 
-.chip--desat {
-  background: oklch(from var(--base) l calc(c * 0.25) h);
-  color: contrast-color(oklch(from var(--base) l calc(c * 0.25) h));
+.demo-button:active:not(:disabled) {
+  background: oklch(from var(--base) calc(l * 0.85) c h);
+  color: contrast-color(oklch(from var(--base) calc(l * 0.85) c h));
 }
 
-.chip--alpha {
-  background: oklch(from var(--base) l c h / 0.5);
+.demo-button:disabled {
+  background: oklch(from var(--base) l calc(c * 0.2) h / 0.5);
   color: contrast-color(var(--base));
+  cursor: not-allowed;
 }
 
 .support-note {

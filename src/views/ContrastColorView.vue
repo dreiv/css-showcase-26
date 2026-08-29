@@ -5,16 +5,44 @@ import SupportBadge from '@/components/SupportBadge.vue'
 const hasContrastColor =
   typeof CSS !== 'undefined' && CSS.supports('color', 'contrast-color(white)')
 
-const swatches = [
-  '#3562e6',
-  '#e63562',
-  '#2fa84f',
-  '#e6a935',
-  '#111111',
-  '#f5f5f0',
-  '#7c3aed',
-  '#0ea5a5',
+interface Badge {
+  label: string
+  bg: string
+}
+
+const badges: Badge[] = [
+  { label: 'Success', bg: '#16a34a' },
+  { label: 'Warning', bg: '#d97706' },
+  { label: 'Danger', bg: '#dc2626' },
+  { label: 'Info', bg: '#2563eb' },
+  { label: 'Brand', bg: '#7c3aed' },
+  { label: 'Neutral', bg: '#475569' },
+  { label: 'Highlight', bg: '#facc15' },
+  { label: 'Pale', bg: '#f1f5f9' },
 ]
+
+interface Avatar {
+  name: string
+  bg: string
+}
+
+const avatars: Avatar[] = [
+  { name: 'Ana Pop', bg: '#f97316' },
+  { name: 'Bogdan Ionescu', bg: '#0891b2' },
+  { name: 'Corina Marin', bg: '#a3e635' },
+  { name: 'David Stan', bg: '#1e293b' },
+  { name: 'Elena Radu', bg: '#f472b6' },
+  { name: 'Filip Ursu', bg: '#fde047' },
+]
+
+function initials(name: string) {
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+}
 
 const custom = ref('#3562e6')
 </script>
@@ -29,13 +57,33 @@ const custom = ref('#3562e6')
 
   <SupportBadge :supported="hasContrastColor" feature="contrast-color()" />
 
-  <div class="swatch-grid">
-    <div v-for="c in swatches" :key="c" class="swatch" :style="{ background: c, '--bg': c }">
-      <span>{{ c }}</span>
+  <h2>Status badges from any brand color</h2>
+  <p class="description">
+    Badges are usually themed per status (success, warning, danger…) with a hand-picked text color
+    for each one. Here every badge shares one rule — <code>color: contrast-color(var(--bg))</code> —
+    and still reads correctly against yellow, slate, or a near-white "Pale" tone.
+  </p>
+
+  <div class="badge-row">
+    <span v-for="b in badges" :key="b.label" class="badge" :style="{ '--bg': b.bg }">
+      {{ b.label }}
+    </span>
+  </div>
+
+  <h2>Avatar initials on generated colors</h2>
+  <p class="description">
+    User avatar colors are typically hashed from a name or id, so you can't know them ahead of
+    time. <code>contrast-color()</code> means the initials stay legible no matter which color the
+    hash lands on.
+  </p>
+
+  <div class="avatar-row">
+    <div v-for="a in avatars" :key="a.name" class="avatar" :style="{ '--bg': a.bg }" :title="a.name">
+      {{ initials(a.name) }}
     </div>
   </div>
 
-  <pre><code>.swatch {
+  <pre><code>.badge, .avatar {
   background: var(--bg);
   color: contrast-color(var(--bg));
 }</code></pre>
@@ -68,27 +116,46 @@ h2:not(:first-child) {
   margin-block-start: 2rem;
 }
 
-.swatch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-block-end: 1.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85em;
+  font-weight: 600;
+
+  background: var(--bg);
+  color: #000;
+  color: contrast-color(var(--bg));
+}
+
+.avatar-row {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-block-end: 1.5rem;
 }
 
-.swatch {
-  aspect-ratio: 4 / 3;
-  border-radius: var(--radius);
+.avatar {
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 50%;
   display: flex;
-  align-items: flex-end;
-  padding: 0.6rem;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 0.8em;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9em;
+  cursor: default;
 
   background: var(--bg);
-  /* Fallback for browsers without contrast-color(): the invalid declaration below
-     is ignored there, so this mid-brightness default survives. */
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+  color: #000;
   color: contrast-color(var(--bg));
 }
 

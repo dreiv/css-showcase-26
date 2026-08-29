@@ -2,58 +2,55 @@
 import { computed, ref } from 'vue'
 import SupportBadge from '@/components/SupportBadge.vue'
 
-// Feature-detect rather than assume — Temporal is newer and less universally shipped.
 const hasTemporal = typeof (globalThis as { Temporal?: unknown }).Temporal !== 'undefined'
 
-const zones = ['UTC', 'America/New_York', 'Europe/Bucharest', 'Asia/Tokyo']
-const selectedZone = ref('Europe/Bucharest')
+interface City {
+  label: string
+  tz: string
+}
 
-const now = ref<string>('')
-const nowInZone = ref<string>('')
-const monthFromNow = ref<string>('')
-const daysUntilNewYear = ref<number | null>(null)
-const durationBreakdown = ref<string>('')
+const cities: City[] = [
+  { label: 'Bucharest', tz: 'Europe/Bucharest' },
+  { label: 'London', tz: 'Europe/London' },
+  { label: 'New York', tz: 'America/New_York' },
+  { label: 'Tokyo', tz: 'Asia/Tokyo' },
+  { label: 'Sydney', tz: 'Australia/Sydney' },
+]
 
-function refresh() {
-  if (!hasTemporal) return
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const T = hasTemporal ? (globalThis as any).Temporal : null
+const today = hasTemporal ? T.Now.plainDateISO() : null
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const T = (globalThis as any).Temporal
+const meetingDate = ref(today ? today.toString() : '')
+const meetingTime = ref('14:00')
+const organizerTz = ref('Europe/Bucharest')
 
-  const instant = T.Now.instant()
-  now.value = instant.toString()
+const meetingZoned = computed(() => {
+  if (!hasTemporal || !meetingDate.value || !meetingTime.value) return null
+  return T.ZonedDateTime.from(`${meetingDate.value}T${meetingTime.value}[${organizerTz.value}]`)
+})
 
-  const zoned = T.Now.zonedDateTimeISO(selectedZone.value)
-  nowInZone.value = zoned.toPlainDateTime().toString().slice(0, 19).replace('T', ' ')
+const cityTimes = computed(() => {
+  const zoned = meetingZoned.value
+  if (!zoned) return []
+  return cities.map((city) => {
+    const converted = zoned.withTimeZone(city.tz)
+    const dayShift = converted.toPlainDate().since(zoned.toPlainDate()).days
+    return {
+      ...city,
+      time: converted.toPlainTime().toString().slice(0, 5),
+      dayShift,
+    }
+  })
+})
 
-  // "a month from now, end of day" — DST-safe, calendar-aware
-  monthFromNow.value = zoned
-    .add({ months: 1 })
-    .with({ hour: 23, minute: 59, second: 0 })
-    .toPlainDate()
-    .toString()
-
-  const today = T.Now.plainDateISO()
-  const newYear = T.PlainDate.from({ year: today.year + 1, month: 1, day: 1 })
-  const untilNewYear = today.until(newYear, { largestUnit: 'days' })
-  daysUntilNewYear.value = untilNewYear.days
-
-  // Calendar-aware duration — hard to get right with plain millisecond math
-  // (variable month/DST length).
+const durationBreakdown = computed(() => {
+  if (!hasTemporal) return ''
   const dur = T.Duration.from({ hours: 51, minutes: 95 }).round({
     largestUnit: 'days',
     relativeTo: today,
   })
-  durationBreakdown.value = `${dur.days}d ${dur.hours}h ${dur.minutes}m`
-}
-
-refresh()
-
-const zoneOffset = computed(() => {
-  if (!hasTemporal) return ''
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const T = (globalThis as any).Temporal
-  return T.Now.zonedDateTimeISO(selectedZone.value).offset
+  return `${dur.days}d ${dur.hours}h ${dur.minutes}m`
 })
 </script>
 
@@ -61,58 +58,66 @@ const zoneOffset = computed(() => {
   <h2>The Temporal API</h2>
   <p class="description">
     A calendar-and-timezone-aware, immutable replacement for <code>Date</code> — built into the
-    language, no <code>date-fns</code>/<code>Luxon</code> import required. Unlike the rest of this
-    showcase, this page is <strong>all JavaScript</strong>: every value below is computed live in
-    your browser with <code>Temporal.*</code> calls, not hand-rolled date math.
+    language, no <code>date-fns</code>/<code>Luxon</code> import required. Every value below is
+    computed live with <code>Temporal.*</code> calls, not hand-rolled date math.
   </p>
 
   <template v-if="hasTemporal">
     <SupportBadge :supported="true" feature="Temporal" />
 
-    <div class="demo-grid">
-      <div class="stat">
-        <span class="label">Exact instant (UTC)</span>
-        <code>{{ now }}</code>
-      </div>
+    <h2>Schedule a meeting, see it land everywhere</h2>
+    <p class="description">
+      Pick a date, time and your zone — every city converts it with real IANA time zone rules
+      (DST included), and flags whenever the meeting lands on a different calendar day there.
+    </p>
 
-      <div class="stat">
-        <span class="label">
-          Local wall-clock time in
-          <select v-model="selectedZone" @change="refresh">
-            <option v-for="z in zones" :key="z" :value="z">{{ z }}</option>
-          </select>
+    <div class="meeting-controls">
+      <label>
+        Date
+        <input type="date" v-model="meetingDate" />
+      </label>
+      <label>
+        Time
+        <input type="time" v-model="meetingTime" />
+      </label>
+      <label>
+        Your zone
+        <select v-model="organizerTz">
+          <option v-for="c in cities" :key="c.tz" :value="c.tz">{{ c.label }}</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="city-grid">
+      <div v-for="c in cityTimes" :key="c.tz" class="city" :class="{ 'city--organizer': c.tz === organizerTz }">
+        <span class="city-label">{{ c.label }}</span>
+        <span class="city-time">{{ c.time }}</span>
+        <span v-if="c.dayShift !== 0" class="day-shift">
+          {{ c.dayShift > 0 ? '+1 day' : '−1 day' }}
         </span>
-        <code>{{ nowInZone }} <small>(UTC{{ zoneOffset }})</small></code>
-      </div>
-
-      <div class="stat">
-        <span class="label">One calendar month from now, end of day, in that zone</span>
-        <code>{{ monthFromNow }}</code>
-      </div>
-
-      <div class="stat">
-        <span class="label">Days until Jan 1 next year</span>
-        <code>{{ daysUntilNewYear }} days</code>
-      </div>
-
-      <div class="stat">
-        <span class="label">51h 95m, rounded to largest sensible units</span>
-        <code>{{ durationBreakdown }}</code>
       </div>
     </div>
 
-    <pre><code>const zoned = Temporal.Now.zonedDateTimeISO('Europe/Bucharest')
+    <pre><code>const meeting = Temporal.ZonedDateTime.from(
+  `${date}T${time}[${organizerZone}]`
+)
 
-// DST-safe, calendar-aware arithmetic — chainable, immutable
-const later = zoned
-  .add({ months: 1 })
-  .with({ hour: 23, minute: 59, second: 0 })
+const tokyo = meeting.withTimeZone('Asia/Tokyo')
+tokyo.toPlainDate().since(meeting.toPlainDate()).days // -&gt; 0 or ±1 if it crosses midnight</code></pre>
 
-const today = Temporal.Now.plainDateISO()
-const newYear = Temporal.PlainDate.from({ year: today.year + 1, month: 1, day: 1 })
-today.until(newYear, { largestUnit: 'days' }).days // -&gt; e.g. 127
+    <h2>Calendar-aware duration</h2>
+    <p class="description">
+      <code>51h 95m</code> doesn't roll over on its own — <code>Duration.round()</code> normalizes
+      it to sensible units, DST and variable-month-length aware given a <code>relativeTo</code>
+      date.
+    </p>
 
-Temporal.Duration.from({ hours: 51, minutes: 95 })
+    <div class="stat">
+      <span class="label">51h 95m, rounded to largest sensible units</span>
+      <code>{{ durationBreakdown }}</code>
+    </div>
+
+    <pre><code>Temporal.Duration.from({ hours: 51, minutes: 95 })
   .round({ largestUnit: 'days', relativeTo: today }) // -&gt; 2d 3h 35m</code></pre>
   </template>
 
@@ -145,10 +150,76 @@ Temporal.Duration.from({ hours: 51, minutes: 95 })
 </template>
 
 <style scoped>
-.demo-grid {
+h2:not(:first-child) {
+  margin-block-start: 2rem;
+}
+
+.meeting-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block-end: 1.25rem;
+}
+
+.meeting-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85em;
+  color: color-mix(in srgb, currentColor 70%, transparent);
+}
+
+.meeting-controls input,
+.meeting-controls select {
+  font: inherit;
+  font-size: 0.95em;
+  color: inherit;
+  background: canvas;
+  border: 1px solid var(--border-strong);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.35rem 0.5rem;
+}
+
+.city-grid {
   display: grid;
-  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
   margin-block-end: 1.5rem;
+}
+
+.city {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+  background: var(--surface);
+}
+
+.city--organizer {
+  border-color: currentColor;
+}
+
+.city-label {
+  font-size: 0.8em;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+.city-time {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 1.15em;
+  font-weight: 600;
+}
+
+.day-shift {
+  align-self: flex-start;
+  font-size: 0.72em;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, orange 25%, canvas);
+  color: color-mix(in srgb, orange 70%, currentColor);
 }
 
 .stat {
@@ -161,34 +232,17 @@ Temporal.Duration.from({ hours: 51, minutes: 95 })
   border-radius: var(--radius);
   padding: 0.75rem 1rem;
   background: var(--surface);
+  margin-block-end: 1.5rem;
 }
 
 .label {
   font-size: 0.85em;
   color: color-mix(in srgb, currentColor 70%, transparent);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
 }
 
 .stat code {
   font-size: 0.95em;
   white-space: nowrap;
-}
-
-.stat code small {
-  color: color-mix(in srgb, currentColor 55%, transparent);
-}
-
-select {
-  font: inherit;
-  font-size: 0.95em;
-  color: inherit;
-  background: canvas;
-  border: 1px solid var(--border-strong);
-  border-radius: calc(var(--radius) - 2px);
-  padding: 0.15rem 0.4rem;
 }
 
 .unsupported {

@@ -9,21 +9,23 @@
     column.
   </p>
 
-  <div class="resize-wrap">
-    <span class="resize-hint" aria-hidden="true">⤡ drag to resize</span>
-    <div class="container-demo">
-      <article class="card">
-        <div class="thumb" aria-hidden="true"></div>
-        <div class="body">
-          <h3>Container-aware card</h3>
-          <p>
-            This layout switches at <code>400px</code> of container width, not window width —
-            resize just the box above, not your browser.
-          </p>
-          <button type="button">Read more</button>
-        </div>
-      </article>
+  <div class="resize-demo">
+    <div class="resize-wrap">
+      <div class="container-demo">
+        <article class="card">
+          <div class="thumb" aria-hidden="true"></div>
+          <div class="body">
+            <h3>Container-aware card</h3>
+            <p>
+              This layout switches at <code>400px</code> of container width, not window width —
+              resize just the box above, not your browser.
+            </p>
+            <button type="button">Read more</button>
+          </div>
+        </article>
+      </div>
     </div>
+    <p class="resize-hint" aria-hidden="true">⤡ drag the corner below to resize</p>
   </div>
 
   <pre><code>.container-demo {
@@ -83,11 +85,13 @@
     narrow card without a media query at all.
   </p>
 
-  <div class="resize-wrap resize-wrap--unit">
-    <span class="resize-hint" aria-hidden="true">⤡ drag to resize</span>
-    <div class="unit-demo">
-      <h3 class="cq-heading">Scales with me</h3>
+  <div class="resize-demo">
+    <div class="resize-wrap">
+      <div class="unit-demo">
+        <h3 class="cq-heading">Scales with me</h3>
+      </div>
     </div>
+    <p class="resize-hint" aria-hidden="true">⤡ drag the corner below to resize</p>
   </div>
 
   <pre><code>.cq-heading {
@@ -101,6 +105,10 @@ h2:not(:first-child) {
 }
 
 /* The drag handle is just the browser's native `resize` — no JS pointer tracking. */
+.resize-demo {
+  margin-block-end: 1.5rem;
+}
+
 .resize-wrap {
   position: relative;
   resize: horizontal;
@@ -111,22 +119,29 @@ h2:not(:first-child) {
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
   padding: 0.75rem;
-  margin-block-end: 1.5rem;
+}
+
+/* The native resize grip can't be styled or moved, so this decorative
+   corner behind it is the only way to give it a bit more visual weight. */
+.resize-wrap::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg,
+      transparent 50%,
+      color-mix(in srgb, var(--accent) 45%, transparent) 50%);
+  border-bottom-right-radius: calc(var(--radius) - 1px);
+  pointer-events: none;
 }
 
 .resize-hint {
-  position: absolute;
-  right: 1.1rem;
-  bottom: 0.35rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.7rem;
+  margin: 0.4rem 0 0;
+  text-align: right;
+  font-size: 0.75rem;
   color: color-mix(in srgb, currentColor 55%, transparent);
-  background: var(--surface);
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  pointer-events: none;
   user-select: none;
 }
 

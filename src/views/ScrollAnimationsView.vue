@@ -18,14 +18,14 @@ const paragraphs = [
 ]
 
 const cards = [
-  { title: 'Reveal on view', body: 'Each card fades and rises in as it enters this pane\'s scrollport.' },
-  { title: 'No IntersectionObserver', body: 'animation-timeline: view() replaces the classic JS reveal-on-scroll setup.' },
-  { title: 'Per-element timeline', body: "Every card tracks its own visibility — no shared state, no manual class toggling." },
-  { title: 'Runs off-thread', body: 'Same compositor-driven animation as the progress bar above.' },
-  { title: 'animation-range', body: 'entry 0% cover 40% controls exactly when the fade starts and ends.' },
-  { title: 'Reverses on scroll-up', body: 'Scroll back up and each card fades back out — the timeline just runs in reverse.' },
-  { title: 'Works with any keyframes', body: 'Swap fade-rise for a scale, a blur, or a rotation — same animation-timeline wiring.' },
-  { title: 'Still just CSS', body: 'animation-timeline is the only thing doing any of this.' },
+  { title: 'Hurtling in from depth', body: 'Each card starts small, blurred and dim, as if it just arrived from far down the z-axis — not just faded in from the side.' },
+  { title: 'No canvas, no particles', body: "The usual way to fake this is a JS starfield: a canvas loop projecting points outward from a vanishing point. Here it's three CSS properties." },
+  { title: 'perspective does the trick', body: '.feed sets perspective: 900px, so a child\'s translateZ() actually reads as motion through space instead of a flat scale.' },
+  { title: 'translateZ + scale + blur', body: 'Cards animate translateZ from -500px to 0 while scaling up and losing blur — depth, size and focus arrive together.' },
+  { title: 'Per-card timeline', body: 'animation-timeline: view() gives every card its own scroll-linked progress — no shared state, no manual class toggling.' },
+  { title: 'animation-range: entry', body: 'Just the entry phase, not "cover" — cover needs scroll room after the card too, which the last ones in a short list don\'t have.' },
+  { title: 'Reverses on scroll-up', body: 'Scroll back up and each card recedes back into the distance — the timeline just runs backward.' },
+  { title: 'Still just CSS', body: 'animation-timeline and perspective are doing all of this — the JS hyperspace-button demos need a render loop instead.' },
 ]
 </script>
 
@@ -59,11 +59,14 @@ const cards = [
   to   { scale: 1 1; }
 }</code></pre>
 
-  <h2>Reveal-on-view, with <code>view()</code></h2>
+  <h2>Hyperspace-jump reveal, with <code>view()</code></h2>
   <p class="description">
-    <code>animation-timeline: view()</code> ties progress to an element's position inside its
-    nearest scrollable ancestor — the classic "fade and rise in as it scrolls into view" effect,
-    with zero JS. Scroll the feed below to see each card animate in.
+    The "flat fade and rise" is the safe default, but <code>animation-timeline: view()</code> can drive
+    any keyframes — including the classic sci-fi "jump to warp speed" entrance normally built with a
+    JS/canvas starfield or a library like GSAP's ScrollTrigger. This version fakes the depth with
+    plain CSS: a <code>perspective</code>d container plus <code>translateZ()</code>, <code>scale</code>
+    and <code>blur()</code> on each card. Scroll the feed below and watch each card rush in from the
+    distance.
   </p>
 
   <div class="feed" tabindex="0">
@@ -73,15 +76,31 @@ const cards = [
     </article>
   </div>
 
-  <pre><code>.reveal-card {
-  animation: fade-rise linear both;
-  animation-timeline: view();
-  animation-range: entry 0% cover 40%;
+  <pre><code>.feed {
+  perspective: 900px;
 }
 
-@keyframes fade-rise {
-  from { opacity: 0; translate: 0 16px; }
-  to   { opacity: 1; translate: 0 0; }
+.reveal-card {
+  animation: warp-jump linear both;
+  animation-timeline: view();
+  /* "entry" only — no "cover" tail. Cover needs scroll room
+     *after* the element too, which the last few cards in a
+     short container don't have, so they'd get stuck mid-animation. */
+  animation-range: entry;
+}
+
+@keyframes warp-jump {
+  from {
+    opacity: 0;
+    transform: translateZ(-500px) scale(0.4);
+    filter: blur(14px);
+  }
+  60%  { opacity: 1; }
+  to   {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+    filter: blur(0);
+  }
 }</code></pre>
 
   <p class="support-note">
@@ -156,6 +175,7 @@ h2:not(:first-child) {
   border-radius: var(--radius);
   padding: 1rem;
   margin-block-end: 1.5rem;
+  perspective: 900px;
 }
 
 .reveal-card {
@@ -165,9 +185,9 @@ h2:not(:first-child) {
   padding: 1rem;
   background: var(--surface);
 
-  animation: fade-rise linear both;
+  animation: warp-jump linear both;
   animation-timeline: view();
-  animation-range: entry 0% cover 40%;
+  animation-range: entry;
 }
 
 .reveal-card h3 {
@@ -181,15 +201,21 @@ h2:not(:first-child) {
   color: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-@keyframes fade-rise {
+@keyframes warp-jump {
   from {
     opacity: 0;
-    translate: 0 16px;
+    transform: translateZ(-500px) scale(0.4);
+    filter: blur(14px);
+  }
+
+  60% {
+    opacity: 1;
   }
 
   to {
     opacity: 1;
-    translate: 0 0;
+    transform: translateZ(0) scale(1);
+    filter: blur(0);
   }
 }
 
