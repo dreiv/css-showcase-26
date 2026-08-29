@@ -4,6 +4,10 @@ import SupportBadge from '@/components/SupportBadge.vue'
 const hasScrollTimeline =
   typeof CSS !== 'undefined' && CSS.supports('animation-timeline', 'scroll()')
 
+// view() timelines are a separate feature from scroll() — Chromium-only for now.
+const hasViewTimeline =
+  typeof CSS !== 'undefined' && CSS.supports('animation-timeline', 'view()')
+
 const paragraphs = [
   'Scroll this pane, not the page — the bar pinned to the top fills as a direct function of how far down you are, driven by animation-timeline: scroll(), not a scroll event listener.',
   'This is the pattern behind the reading-progress bar you see on long articles: pin a thin bar to the top of the scroll container, then tie its scale to the container\'s own scroll offset.',
@@ -18,14 +22,14 @@ const paragraphs = [
 ]
 
 const cards = [
-  { title: 'Hurtling in from depth', body: 'Each card starts small, blurred and dim, as if it just arrived from far down the z-axis — not just faded in from the side.' },
-  { title: 'No canvas, no particles', body: "The usual way to fake this is a JS starfield: a canvas loop projecting points outward from a vanishing point. Here it's three CSS properties." },
-  { title: 'perspective does the trick', body: '.feed sets perspective: 900px, so a child\'s translateZ() actually reads as motion through space instead of a flat scale.' },
-  { title: 'translateZ + scale + blur', body: 'Cards animate translateZ from -500px to 0 while scaling up and losing blur — depth, size and focus arrive together.' },
+  { title: 'Fade and rise', body: 'Each card fades in from opacity 0 while rising 10px into place as it enters the scroll pane.' },
+  { title: 'Two properties, one timeline', body: 'opacity and translateY are the entire effect — no perspective, no blur, no scale.' },
   { title: 'Per-card timeline', body: 'animation-timeline: view() gives every card its own scroll-linked progress — no shared state, no manual class toggling.' },
-  { title: 'animation-range: entry', body: 'Just the entry phase, not "cover" — cover needs scroll room after the card too, which the last ones in a short list don\'t have.' },
-  { title: 'Reverses on scroll-up', body: 'Scroll back up and each card recedes back into the distance — the timeline just runs backward.' },
-  { title: 'Still just CSS', body: 'animation-timeline and perspective are doing all of this — the JS hyperspace-button demos need a render loop instead.' },
+  { title: 'Threshold with animation-range', body: 'entry 20% waits until 20% of the card is in the viewport before the reveal starts — the CSS equivalent of an IntersectionObserver threshold.' },
+  { title: 'Reverses on scroll-up', body: 'Scroll back up and each card fades out and drops back down — the timeline just runs backward.' },
+  { title: 'No observers needed', body: 'No IntersectionObserver, no scroll listener — the timeline supplies the 0-to-1 progress value directly.' },
+  { title: 'Compositor-driven', body: 'The animation runs off the main thread, so it keeps up even while JavaScript is busy doing something else.' },
+  { title: 'Still just CSS', body: 'animation-timeline and two keyframes are doing all of this — no JS, no library.' },
 ]
 </script>
 
@@ -59,15 +63,14 @@ const cards = [
   to   { scale: 1 1; }
 }</code></pre>
 
-  <h2>Hyperspace-jump reveal, with <code>view()</code></h2>
+  <h2>Simple reveal, with <code>view()</code></h2>
   <p class="description">
-    The "flat fade and rise" is the safe default, but <code>animation-timeline: view()</code> can drive
-    any keyframes — including the classic sci-fi "jump to warp speed" entrance normally built with a
-    JS/canvas starfield or a library like GSAP's ScrollTrigger. This version fakes the depth with
-    plain CSS: a <code>perspective</code>d container plus <code>translateZ()</code>, <code>scale</code>
-    and <code>blur()</code> on each card. Scroll the feed below and watch each card rush in from the
-    distance.
+    <code>animation-timeline: view()</code> ties each element's animation to its position in the
+    scroll port. Here it drives a plain reveal: opacity from 0 to 1 and a 10px rise into place as
+    each card enters the pane. Scroll the feed below and watch each card fade in.
   </p>
+
+  <SupportBadge :supported="hasViewTimeline" feature="animation-timeline: view()" />
 
   <div class="feed" tabindex="0">
     <article v-for="c in cards" :key="c.title" class="reveal-card">
@@ -76,36 +79,30 @@ const cards = [
     </article>
   </div>
 
-  <pre><code>.feed {
-  perspective: 900px;
-}
-
-.reveal-card {
-  animation: warp-jump linear both;
+  <pre><code>.reveal-card {
+  animation: fade-rise linear both;
   animation-timeline: view();
-  /* "entry" only — no "cover" tail. Cover needs scroll room
-     *after* the element too, which the last few cards in a
-     short container don't have, so they'd get stuck mid-animation. */
-  animation-range: entry;
+  /* Start at 20% entry (card is 20% in view) and finish at 50% —
+     the CSS equivalent of an IntersectionObserver threshold. */
+  animation-range: entry 20% entry 50%;
 }
 
-@keyframes warp-jump {
+@keyframes fade-rise {
   from {
     opacity: 0;
-    transform: translateZ(-500px) scale(0.4);
-    filter: blur(14px);
+    transform: translateY(10px);
   }
-  60%  { opacity: 1; }
-  to   {
+
+  to {
     opacity: 1;
-    transform: translateZ(0) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }</code></pre>
 
   <p class="support-note">
-    <code>animation-timeline: view()</code> follows the same support story as the badge above —
-    treat the effect as progressive enhancement (<code>@supports (animation-timeline: scroll())</code>) rather than
+    <code>view()</code> timelines are a separate feature from <code>scroll()</code> and are
+    Chromium-only for now — Firefox and Safari don't support them yet. Treat the reveal as
+    progressive enhancement (<code>@supports (animation-timeline: view())</code>) rather than
     load-bearing for content.
   </p>
 </template>
@@ -175,7 +172,6 @@ h2:not(:first-child) {
   border-radius: var(--radius);
   padding: 1rem;
   margin-block-end: 1.5rem;
-  perspective: 900px;
 }
 
 .reveal-card {
@@ -185,9 +181,9 @@ h2:not(:first-child) {
   padding: 1rem;
   background: var(--surface);
 
-  animation: warp-jump linear both;
+  animation: fade-rise linear both;
   animation-timeline: view();
-  animation-range: entry;
+  animation-range: entry 75%;
 }
 
 .reveal-card h3 {
@@ -201,21 +197,15 @@ h2:not(:first-child) {
   color: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-@keyframes warp-jump {
+@keyframes fade-rise {
   from {
     opacity: 0;
-    transform: translateZ(-500px) scale(0.4);
-    filter: blur(14px);
-  }
-
-  60% {
-    opacity: 1;
+    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
-    transform: translateZ(0) scale(1);
-    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
