@@ -61,8 +61,7 @@ h2:not(:first-child) {
   margin-block-start: 2rem;
 }
 
-/* the drag handle is just the browser's native `resize` on a plain block —
-   no JS pointer tracking needed like the popover-playground drag demo */
+/* The drag handle is just the browser's native `resize` — no JS pointer tracking. */
 .resize-wrap {
   resize: horizontal;
   overflow: auto;
@@ -107,7 +106,6 @@ h2:not(:first-child) {
   color: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-/* the actual trick: layout responds to the *container's* inline size */
 @container card-container (min-width: 400px) {
   .card {
     grid-template-columns: 140px 1fr;

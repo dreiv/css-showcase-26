@@ -1,4 +1,4 @@
-/* Basic reset — no custom fonts, we rely on the browser/OS default stack */
+/* Basic reset */
 :root {
   color-scheme: light dark;
 
@@ -82,7 +82,7 @@ nav.site-nav a.router-link-exact-active {
   color: var(--accent);
 }
 
-/* ---- shared "plain" table look, used by the home index and the data table demo ---- */
+/* ---- shared table styles ---- */
 
 table {
   width: 100%;
@@ -105,7 +105,7 @@ tbody tr:hover {
   background: var(--surface);
 }
 
-/* ---- shared buttons/inputs, kept intentionally plain ---- */
+/* ---- shared buttons/inputs ---- */
 
 button {
   font: inherit;

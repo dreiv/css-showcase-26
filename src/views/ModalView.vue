@@ -11,12 +11,9 @@ const hasInvokerCommands =
     No <code>@click</code>, no <code>showModal()</code> call, no ref. A button with
     <code>command="show-modal"</code> and <code>commandfor="the-dialog-id"</code> opens a
     <code>&lt;dialog&gt;</code> declaratively — the
-    <a
-      href="https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API"
-      target="_blank"
-      rel="noopener"
-      >Invoker Commands API</a
-    >. The dialog closes itself the same way, plus light-dismiss via <code>closedby="any"</code>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API" target="_blank"
+      rel="noopener">Invoker Commands API</a>. The dialog closes itself the same way, plus light-dismiss via
+    <code>closedby="any"</code>
     (click the backdrop or hit Esc) — all wired up in HTML, none of it in this file's
     <code>&lt;script&gt;</code> block.
   </p>
@@ -101,8 +98,8 @@ const hasInvokerCommands =
   color: inherit;
   box-shadow: 0 20px 60px rgb(0 0 0 / 25%);
 
-  /* entry/exit animation — no JS, just transitioning the properties that
-     move a top-layer element in and out along with its own overlay/display */
+  /* Entry/exit animation: transition overlay/display (allow-discrete) alongside
+     opacity/scale so the top-layer element animates in and out. */
   opacity: 0;
   scale: 0.96;
   transition:

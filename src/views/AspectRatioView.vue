@@ -117,11 +117,9 @@ h2:not(:first-child) {
   width: 100%;
   border-radius: var(--radius);
   background:
-    repeating-linear-gradient(
-      45deg,
+    repeating-linear-gradient(45deg,
       var(--surface-hover) 0 10px,
-      var(--surface) 10px 20px
-    );
+      var(--surface) 10px 20px);
   border: 1px solid var(--border-strong);
 }
 
@@ -131,8 +129,7 @@ h2:not(:first-child) {
 
 .fake-photo--cropped {
   aspect-ratio: 16 / 9;
-  /* pretend this is an <img style="object-fit: cover"> cropping the tall
-     source photo down to a 16:9 slot without distortion */
+  /* Stands in for an <img> cropped to 16:9 via object-fit: cover. */
   background-position: center 20%;
   background-size: cover;
 }

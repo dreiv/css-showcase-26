@@ -83,7 +83,6 @@ const items = [
   color: var(--accent);
 }
 
-/* the collapsible region fades and slides in as it opens */
 .clip {
   overflow: hidden;
   min-height: 0;
@@ -94,7 +93,7 @@ const items = [
     translate 0.35s 0.05s ease;
 }
 
-.clip > p {
+.clip>p {
   margin: 0;
   padding-block-start: 0.85rem;
   color: color-mix(in srgb, currentColor 70%, transparent);

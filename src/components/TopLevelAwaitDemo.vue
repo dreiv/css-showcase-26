@@ -1,8 +1,6 @@
 <script setup lang="ts">
-// This is real top-level await: no async function wrapper, no .then().
-// A <script setup> block that awaits at the top level makes the whole
-// component async — Vue requires a <Suspense> boundary around it, which
-// TopLevelAwaitView.vue provides.
+// Top-level await makes this component async — it needs a <Suspense>
+// boundary (provided by TopLevelAwaitView.vue).
 
 function loadRemoteConfig(): Promise<{ theme: string; region: string; loadedAt: string }> {
   return new Promise((resolve) => {

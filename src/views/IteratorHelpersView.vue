@@ -7,8 +7,7 @@ const IteratorCtor = (globalThis as any).Iterator
 const hasIteratorHelpers =
   typeof IteratorCtor !== 'undefined' && typeof IteratorCtor.prototype?.map === 'function'
 
-// An infinite generator — the whole point of iterator helpers is that they
-// stay lazy, so this never fully evaluates.
+// Infinite generator — stays lazy, so this never fully evaluates.
 function* naturals() {
   let n = 1
   while (true) yield n++
@@ -18,11 +17,8 @@ const takeCount = ref(8)
 
 const result = computed(() => {
   if (!hasIteratorHelpers) return []
-  // Cast: TS's default lib doesn't yet ship the esnext.iterator types this
-  // proposal needs, so its type declarations for Iterator.prototype.map/
-  // filter/take aren't visible here even though the runtime check above
-  // confirms they exist. Widening the tsconfig `lib` for one demo page
-  // isn't worth it — the feature-detected `any` is the pragmatic tradeoff.
+  // Cast: TS's default lib doesn't ship the esnext.iterator types yet, so the
+  // Iterator.prototype.map/filter/take declarations aren't visible here.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const naturalsIter = naturals() as any
   return naturalsIter
@@ -32,7 +28,7 @@ const result = computed(() => {
     .toArray()
 })
 
-// The manual, pre-Iterator-helpers version of the same computation, for comparison.
+// Manual, pre-Iterator-helpers version of the same computation, for comparison.
 function manualVersion(limit: number) {
   const out: number[] = []
   let n = 1
@@ -70,7 +66,7 @@ const manualResult = computed(() => manualVersion(takeCount.value))
   <div class="result-row">
     <span class="chip" v-for="n in hasIteratorHelpers ? result : manualResult" :key="n">{{
       n
-    }}</span>
+      }}</span>
   </div>
 
   <pre><code>function* naturals() {

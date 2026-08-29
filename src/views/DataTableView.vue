@@ -65,8 +65,7 @@ const rows = computed(() => {
   })
 })
 
-// a couple of rows get a small note popover, to show the anchored-note pattern
-// without wiring every single cell up for it
+// Only a couple of rows get a note popover, to demo the anchored-note pattern.
 const notedProductIds = new Set([2, 3])
 </script>
 
@@ -112,17 +111,12 @@ const notedProductIds = new Set([2, 3])
     <table class="data-table">
       <thead>
         <tr>
-          <th
-            v-for="(col, i) in columns"
-            :key="col.key"
-            :class="{ pin: i === 0 }"
-            :aria-sort="ariaSort(col.key)"
-          >
+          <th v-for="(col, i) in columns" :key="col.key" :class="{ pin: i === 0 }" :aria-sort="ariaSort(col.key)">
             <button type="button" class="sort-btn" @click="toggleSort(col.key)">
               {{ col.label }}
               <span v-if="sortKey === col.key" class="arrow">{{
                 sortDir === 'asc' ? '↑' : '↓'
-              }}</span>
+                }}</span>
             </button>
           </th>
         </tr>
@@ -133,25 +127,15 @@ const notedProductIds = new Set([2, 3])
           <td>{{ p.category }}</td>
           <td>
             ${{ p.price.toFixed(2) }}
-            <button
-              v-if="p.id === 3"
-              type="button"
-              class="note-btn note-btn--monitor"
-              popovertarget="note-monitor"
-              aria-label="Note about 4K Monitor price"
-            >
+            <button v-if="p.id === 3" type="button" class="note-btn note-btn--monitor" popovertarget="note-monitor"
+              aria-label="Note about 4K Monitor price">
               i
             </button>
           </td>
           <td :class="{ 'out-of-stock': p.stock === 0 }">
             {{ p.stock === 0 ? 'Out of stock' : p.stock }}
-            <button
-              v-if="p.id === 2"
-              type="button"
-              class="note-btn note-btn--keyboard"
-              popovertarget="note-keyboard"
-              aria-label="Note about Mechanical Keyboard stock"
-            >
+            <button v-if="p.id === 2" type="button" class="note-btn note-btn--keyboard" popovertarget="note-keyboard"
+              aria-label="Note about Mechanical Keyboard stock">
               i
             </button>
           </td>
@@ -187,12 +171,9 @@ const notedProductIds = new Set([2, 3])
 }
 
 /* --- the filter popover ---
-   IMPORTANT: display/opacity only get set under :popover-open. The browser's own
-   stylesheet hides a [popover] by default via `:not(:popover-open) { display: none }` —
-   setting `display: flex` unconditionally (as an earlier version of this did) is an
-   author rule of equal-or-higher specificity, so it silently wins over the browser's
-   "hidden" rule and the panel never actually closes. Keeping `display` scoped to
-   :popover-open is what makes the toggle button work at all. */
+   display/opacity must stay scoped to :popover-open: the browser hides [popover]
+   by default, and an unconditional `display` rule would win over that and the
+   panel would never close. */
 .filter-popover {
   display: none;
   flex-direction: column;
@@ -319,13 +300,13 @@ const notedProductIds = new Set([2, 3])
   background: var(--surface-hover);
 }
 
-/* Anchor everything to its trigger, but only where anchor positioning is actually
-   supported — everywhere else the popovers just fall back to the browser's default
-   centered position, which still opens/closes correctly on its own. */
+/* Anchor to the trigger only where supported; elsewhere the popovers fall back
+   to the browser's default centered position. */
 @supports (anchor-name: --a) {
   .filter-btn {
     anchor-name: --filter-btn;
   }
+
   .filter-popover {
     position-anchor: --filter-btn;
     inset: auto;
@@ -338,15 +319,19 @@ const notedProductIds = new Set([2, 3])
   .note-btn--keyboard {
     anchor-name: --note-keyboard;
   }
+
   .note-btn--monitor {
     anchor-name: --note-monitor;
   }
+
   .note-card--keyboard {
     position-anchor: --note-keyboard;
   }
+
   .note-card--monitor {
     position-anchor: --note-monitor;
   }
+
   .note-card {
     inset: auto;
     top: anchor(bottom);
@@ -411,7 +396,7 @@ const notedProductIds = new Set([2, 3])
   z-index: 2;
 }
 
-.data-table tbody tr:hover > * {
+.data-table tbody tr:hover>* {
   background: var(--surface);
 }
 </style>

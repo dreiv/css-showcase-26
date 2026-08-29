@@ -2,8 +2,7 @@
 import { computed, ref } from 'vue'
 import SupportBadge from '@/components/SupportBadge.vue'
 
-// Feature-detect rather than assume — Temporal is newer and less universally
-// shipped than the CSS techniques elsewhere in this showcase.
+// Feature-detect rather than assume — Temporal is newer and less universally shipped.
 const hasTemporal = typeof (globalThis as { Temporal?: unknown }).Temporal !== 'undefined'
 
 const zones = ['UTC', 'America/New_York', 'Europe/Bucharest', 'Asia/Tokyo']
@@ -27,7 +26,6 @@ function refresh() {
   const zoned = T.Now.zonedDateTimeISO(selectedZone.value)
   nowInZone.value = zoned.toPlainDateTime().toString().slice(0, 19).replace('T', ' ')
 
-  // date arithmetic that used to mean reaching for date-fns/Luxon:
   // "a month from now, end of day" — DST-safe, calendar-aware
   monthFromNow.value = zoned
     .add({ months: 1 })
@@ -40,8 +38,8 @@ function refresh() {
   const untilNewYear = today.until(newYear, { largestUnit: 'days' })
   daysUntilNewYear.value = untilNewYear.days
 
-  // a duration, broken into calendar-aware units — impossible to get
-  // right by hand with plain millisecond math because of variable month/DST length
+  // Calendar-aware duration — hard to get right with plain millisecond math
+  // (variable month/DST length).
   const dur = T.Duration.from({ hours: 51, minutes: 95 }).round({
     largestUnit: 'days',
     relativeTo: today,
@@ -84,9 +82,7 @@ const zoneOffset = computed(() => {
             <option v-for="z in zones" :key="z" :value="z">{{ z }}</option>
           </select>
         </span>
-        <code
-          >{{ nowInZone }} <small>(UTC{{ zoneOffset }})</small></code
-        >
+        <code>{{ nowInZone }} <small>(UTC{{ zoneOffset }})</small></code>
       </div>
 
       <div class="stat">
@@ -136,18 +132,14 @@ Temporal.Duration.from({ hours: 51, minutes: 95 })
   <p class="support-note">
     Reached TC39 Stage 4 (part of the ES2026 spec) in March 2026. Firefox shipped it first, in
     version 139 (2025); Chrome followed in Chrome 144 (January 2026).
-    <strong
-      >Edge, despite sharing Chrome's engine, has not enabled it in its stable channel as of this
-      writing</strong
-    >
+    <strong>Edge, despite sharing Chrome's engine, has not enabled it in its stable channel as of this
+      writing</strong>
     — it's a good reminder that "same rendering engine" doesn't mean "same feature flags," and that
     Baseline status (not just "which engine") is the thing to check before relying on something.
     Safari is further behind, with support landing incrementally in Technology Preview. Feature-
     detect (<code>typeof Temporal !== 'undefined'</code>) rather than sniffing the browser, and
     reach for the
-    <a href="https://tc39.es/proposal-temporal/docs/" target="_blank" rel="noopener"
-      >official TC39 polyfill</a
-    >
+    <a href="https://tc39.es/proposal-temporal/docs/" target="_blank" rel="noopener">official TC39 polyfill</a>
     to cover the gap in the meantime.
   </p>
 </template>

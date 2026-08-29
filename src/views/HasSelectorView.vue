@@ -19,7 +19,6 @@ function removeItem() {
     below, all the same primitive.
   </p>
 
-  <!-- 1. star rating: sibling-based hover preview, zero JS -->
   <h3>1. Star rating (sibling state, no JS)</h3>
   <p class="mini">
     Hovering a star highlights it <em>and every star before it</em>, using
@@ -32,13 +31,12 @@ function removeItem() {
     </template>
   </fieldset>
   <pre><code>/* light up this star, plus every star that comes after it in the DOM
-   (which is visually *before* it, thanks to flex-direction: row-reverse) */
-.star:has(~ .star:hover),
-.star:hover {
-  color: var(--accent);
-}</code></pre>
+    (which is visually *before* it, thanks to flex-direction: row-reverse) */
+    .star:has(~ .star:hover),
+    .star:hover {
+    color: var(--accent);
+    }</code></pre>
 
-  <!-- 2. live form validation styling the wrapper -->
   <h3>2. Live validation (style the wrapper from the input's state)</h3>
   <p class="mini">
     The field's border/icon react to <code>:invalid</code> deep inside it — previously this needed
@@ -55,13 +53,12 @@ function removeItem() {
     </label>
   </form>
   <pre><code>.field-wrap:has(:invalid:not(:placeholder-shown)) {
-  border-color: crimson;
-}
-.field-wrap:has(:valid:not(:placeholder-shown)) {
-  border-color: seagreen;
-}</code></pre>
+    border-color: crimson;
+    }
+    .field-wrap:has(:valid:not(:placeholder-shown)) {
+    border-color: seagreen;
+    }</code></pre>
 
-  <!-- 3. selectable cards acting as a custom radio group -->
   <h3>3. Selectable cards (custom radio group)</h3>
   <p class="mini">
     Each card is a <code>&lt;label&gt;</code> wrapping a hidden radio;
@@ -74,11 +71,10 @@ function removeItem() {
     </label>
   </div>
   <pre><code>.plan:has(:checked) {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-}</code></pre>
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    }</code></pre>
 
-  <!-- 4. quantity query: layout depends on how many children exist -->
   <h3>4. Quantity query (layout depends on child count)</h3>
   <p class="mini">
     <code>:has(:nth-child(4))</code> flips the grid to a denser layout once there are 4+ items —
@@ -93,19 +89,18 @@ function removeItem() {
     <li v-if="items.length === 0" class="empty-note">No items — add one above.</li>
   </ul>
   <pre><code>.qty-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-}
-/* once a 4th item shows up, go denser */
-.qty-grid:has(> :nth-child(4)) {
-  grid-template-columns: repeat(4, 1fr);
-}
-/* style the list itself when it has *no* real items */
-.qty-grid:not(:has(li:not(.empty-note))) {
-  display: block;
-}</code></pre>
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    }
+    /* once a 4th item shows up, go denser */
+    .qty-grid:has(> :nth-child(4)) {
+    grid-template-columns: repeat(4, 1fr);
+    }
+    /* style the list itself when it has *no* real items */
+    .qty-grid:not(:has(li:not(.empty-note))) {
+    display: block;
+    }</code></pre>
 
-  <!-- 5. content-aware styling: parent adapts to what it contains -->
   <h3>5. Content-aware layout (style based on what's inside)</h3>
   <p class="mini">
     An article with a leading image gets a hero treatment; a text-only one gets a plain layout —
@@ -113,11 +108,7 @@ function removeItem() {
   </p>
   <div class="content-grid">
     <article class="post has-media">
-      <img
-        src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=240&q=60"
-        alt=""
-        loading="lazy"
-      />
+      <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=240&q=60" alt="" loading="lazy" />
       <div>
         <h4>With a cover image</h4>
         <p>The <code>:has(img)</code> match switches this to a two-column layout.</p>
@@ -131,8 +122,8 @@ function removeItem() {
     </article>
   </div>
   <pre><code>.post:has(img) {
-  grid-template-columns: 96px 1fr;
-}</code></pre>
+    grid-template-columns: 96px 1fr;
+    }</code></pre>
 </template>
 
 <style scoped>
@@ -186,8 +177,8 @@ pre {
   color: var(--accent);
 }
 
-.star-input:checked + .star,
-.star-input:checked + .star ~ .star {
+.star-input:checked+.star,
+.star-input:checked+.star~.star {
   color: var(--accent);
 }
 
@@ -272,7 +263,7 @@ pre {
   gap: 0.6rem;
 }
 
-.qty-grid > li:not(.empty-note) {
+.qty-grid>li:not(.empty-note) {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   padding: 0.6rem 0.8rem;

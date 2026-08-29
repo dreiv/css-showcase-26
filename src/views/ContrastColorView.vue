@@ -85,13 +85,10 @@ h2:not(:first-child) {
   font-size: 0.8em;
 
   background: var(--bg);
-  /* fallback for browsers without contrast-color(): a mid-brightness default that
-     reads reasonably on both light and dark swatches. The line below overrides it
-     wherever contrast-color() is valid — an invalid declaration is ignored, not applied,
-     so unsupported browsers simply never see it and keep this fallback. */
+  /* Fallback for browsers without contrast-color(): the invalid declaration below
+     is ignored there, so this mid-brightness default survives. */
   color: #fff;
   text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
-  /* the actual trick: derive readable text color from the background itself */
   color: contrast-color(var(--bg));
 }
 

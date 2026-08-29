@@ -80,17 +80,10 @@ const selected = () => items.find((i) => i.id === selectedId.value) ?? null
   </div>
 
   <div class="items" :class="layout === 'list' && 'items--list'">
-    <button
-      v-for="item in items"
-      :key="item.id"
-      type="button"
-      class="item"
-      :style="{
-        '--accent': item.color,
-        viewTransitionName: selectedId === item.id ? undefined : `card-${item.id}`,
-      }"
-      @click="openDetail(item.id)"
-    >
+    <button v-for="item in items" :key="item.id" type="button" class="item" :style="{
+      '--accent': item.color,
+      viewTransitionName: selectedId === item.id ? undefined : `card-${item.id}`,
+    }" @click="openDetail(item.id)">
       <span class="swatch" :style="{ background: item.color }"></span>
       <span class="title">{{ item.title }}</span>
     </button>
@@ -114,10 +107,7 @@ const selected = () => items.find((i) => i.id === selectedId.value) ?? null
   </p>
 
   <div v-if="selected()" class="detail-overlay" @click.self="closeDetail">
-    <div
-      class="detail-card"
-      :style="{ '--accent': selected()!.color, viewTransitionName: `card-${selected()!.id}` }"
-    >
+    <div class="detail-card" :style="{ '--accent': selected()!.color, viewTransitionName: `card-${selected()!.id}` }">
       <span class="swatch swatch--large" :style="{ background: selected()!.color }"></span>
       <h3>{{ selected()!.title }}</h3>
       <p>
@@ -248,9 +238,8 @@ h2:not(:first-child) {
   font-size: 0.85em;
 }
 
-/* view-transition-name only takes effect when the browser actually starts a
-   transition; harmless to leave set otherwise */
 @media (prefers-reduced-motion: reduce) {
+
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {

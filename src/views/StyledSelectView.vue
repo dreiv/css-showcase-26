@@ -138,8 +138,7 @@ const country = ref('')
   outline-offset: 2px;
 }
 
-/* Firefox draws its own focus dotted-line inside the option list — this hides it
-   without touching focus-visible above */
+/* Hide Firefox's internal focus dotted-line in the option list. */
 .styled-select:-moz-focusring {
   color: transparent;
   text-shadow: 0 0 0 currentColor;
