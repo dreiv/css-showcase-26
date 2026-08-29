@@ -26,6 +26,7 @@ const {
   onDrop,
   colRef,
   startResize,
+  resizeBy,
 } = useColumnConfig()
 
 const {
@@ -81,8 +82,8 @@ function onToggleVisible(key: SortKey, value: boolean) {
     you scroll the table — both use native <code>popover</code> + CSS anchor positioning, with
     <code>position-try-fallbacks</code> flipping them back on screen near an edge and
     <code>position-visibility: anchors-visible</code> hiding a note the moment its trigger scrolls
-    out of view. Columns are drag-to-resize, and the config dialog on the right lets you show,
-    hide and reorder them.
+    out of view. Columns are drag-to-resize — or focus a column edge and use the arrow keys —
+    and the config dialog on the right lets you show, hide and reorder them.
   </p>
 
   <div class="toolbar">
@@ -104,8 +105,8 @@ function onToggleVisible(key: SortKey, value: boolean) {
     @reset="resetColumns" @move="moveDraft" @dragstart="onDragStart" @drop="onDrop" @toggle-visible="onToggleVisible" />
 
   <DataTable :rows="rows" :visible-columns="visibleColumns" :column-widths="columnWidths" :table-width="tableWidth"
-    :sort-key="sortKey" :sort-dir="sortDir" :col-ref="colRef" :start-resize="startResize" :notes="NOTES"
-    @sort="toggleSort" />
+    :sort-key="sortKey" :sort-dir="sortDir" :col-ref="colRef" :start-resize="startResize" :resize-by="resizeBy"
+    :notes="NOTES" @sort="toggleSort" />
 
   <p class="support-note">
     <code>position-visibility: anchors-visible</code> and drag-to-resize columns rely on CSS anchor

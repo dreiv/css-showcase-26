@@ -158,6 +158,12 @@ export function useColumnConfig() {
     handle.addEventListener("pointerup", onUp, { once: true });
   }
 
+  function resizeBy(key: SortKey, delta: number) {
+    const next = Math.min(MAX_COL_WIDTH, Math.max(MIN_COL_WIDTH, columnWidths.value[key] + delta));
+    columnWidths.value = { ...columnWidths.value, [key]: next };
+    saveSession(SESSION_KEYS.widths, columnWidths.value);
+  }
+
   return {
     columnOrder,
     columnVisible,
@@ -176,5 +182,6 @@ export function useColumnConfig() {
     onDrop,
     colRef,
     startResize,
+    resizeBy,
   };
 }

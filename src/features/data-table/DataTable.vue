@@ -15,6 +15,7 @@ const props = defineProps<{
   sortDir: SortDir
   colRef: (key: SortKey) => (el: Element | ComponentPublicInstance | null) => void
   startResize: (event: PointerEvent, key: SortKey) => void
+  resizeBy: (key: SortKey, delta: number) => void
   notes: NoteEntry[]
 }>()
 
@@ -25,6 +26,16 @@ const emit = defineEmits<{
 function ariaSort(key: SortKey) {
   if (props.sortKey !== key) return 'none'
   return props.sortDir === 'asc' ? 'ascending' : 'descending'
+}
+
+function onResizeKeydown(event: KeyboardEvent, key: SortKey) {
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    props.resizeBy(key, -10)
+  } else if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    props.resizeBy(key, 10)
+  }
 }
 </script>
 
@@ -46,7 +57,9 @@ function ariaSort(key: SortKey) {
                 {{ sortDir === 'asc' ? '↑' : '↓' }}
               </span>
             </button>
-            <span class="col-resizer" role="presentation" @pointerdown="startResize($event, col.key)"></span>
+            <button type="button" class="col-resizer" :aria-label="`Resize ${col.label} column`"
+              :aria-valuenow="columnWidths[col.key]" @pointerdown="startResize($event, col.key)"
+              @keydown="onResizeKeydown($event, col.key)"></button>
           </th>
           <th class="filler" aria-hidden="true"></th>
         </tr>
@@ -129,6 +142,7 @@ function ariaSort(key: SortKey) {
 }
 
 .col-resizer {
+  all: unset;
   position: absolute;
   top: 0;
   right: 0;
@@ -138,7 +152,18 @@ function ariaSort(key: SortKey) {
   touch-action: none;
 }
 
-.col-resizer:hover,
+.col-resizer:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+
+th:hover .col-resizer,
+.col-resizer:hover {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.col-resizer:focus,
 .col-resizer:active {
   background: color-mix(in srgb, var(--accent) 45%, transparent);
 }
