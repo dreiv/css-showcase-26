@@ -96,7 +96,6 @@
   anchor-name: --a-br;
 }
 
-/* Named fallback: open to the left of the anchor instead of the right. */
 @position-try --open-left {
   left: auto;
   right: anchor(left);

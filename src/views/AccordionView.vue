@@ -278,7 +278,6 @@ h3 {
   translate: none;
 }
 
-/* --- the actual trick: animate a grid track instead of height --- */
 .enhanced::details-content {
   display: grid;
   grid-template-rows: 0fr;

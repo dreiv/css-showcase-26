@@ -256,7 +256,6 @@ const country = ref('')
   text-shadow: 0 0 0 currentColor;
 }
 
-/* status select: colored dot on the left, driven by a CSS var per state */
 .status-wrap {
   --status-color: var(--border-strong);
 }

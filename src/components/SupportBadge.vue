@@ -1,8 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  /** Whether the feature was detected as supported in the current browser. */
   supported: boolean
-  /** Short name of the feature, e.g. "animation-timeline: scroll()". */
   feature: string
 }>()
 </script>

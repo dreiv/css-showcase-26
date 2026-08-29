@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// Top-level await makes this component async — it needs a <Suspense>
-// boundary (provided by TopLevelAwaitView.vue).
+// Top-level await makes this component async — it needs a <Suspense> boundary (see TopLevelAwaitView.vue).
 
 function loadRemoteConfig(): Promise<{ theme: string; region: string; loadedAt: string }> {
   return new Promise((resolve) => {

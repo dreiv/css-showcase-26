@@ -29,14 +29,12 @@ function thumbBackground(color: string) {
   return `linear-gradient(160deg, ${color}, color-mix(in srgb, ${color} 55%, black))`
 }
 
-// Real DOM nodes, keyed by item id. view-transition-name has to be assigned
-// and removed *imperatively*, scoped to only the elements taking part in the
-// transition that's actually running. A name left on an element that isn't
-// part of that transition still gets its own ::view-transition-group, and
-// that group paints above the root snapshot — backdrop included — no matter
-// what z-index says. That's what caused unrelated card thumbnails to float
-// above the dialog: every card kept a permanent viewTransitionName binding,
-// so all six were still "in the transition" even when only one moved.
+// Real DOM nodes, keyed by item id. view-transition-name must be set/removed
+// imperatively, scoped to only the elements in the running transition: a name
+// left on an element outside the transition still gets its own
+// ::view-transition-group, which paints above the root snapshot (backdrop
+// included) regardless of z-index — that's why permanently-named cards used to
+// float above the dialog.
 const itemEls = new Map<number, HTMLElement>()
 const thumbEls = new Map<number, HTMLElement>()
 

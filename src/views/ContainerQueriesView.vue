@@ -104,7 +104,7 @@ h2:not(:first-child) {
   margin-block-start: 2rem;
 }
 
-/* The drag handle is just the browser's native `resize` — no JS pointer tracking. */
+/* The drag handle is the browser's native `resize` — no JS. */
 .resize-demo {
   margin-block-end: 1.5rem;
 }
@@ -121,8 +121,7 @@ h2:not(:first-child) {
   padding: 0.75rem;
 }
 
-/* The native resize grip can't be styled or moved, so this decorative
-   corner behind it is the only way to give it a bit more visual weight. */
+/* The native grip can't be styled, so this decorative corner adds visual weight. */
 .resize-wrap::after {
   content: '';
   position: absolute;

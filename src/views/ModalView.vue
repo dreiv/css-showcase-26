@@ -5,10 +5,8 @@ import SupportBadge from '@/components/SupportBadge.vue'
 const hasInvokerCommands =
   typeof HTMLButtonElement !== 'undefined' && 'command' in HTMLButtonElement.prototype
 
-// The markup, styling and open/close mechanics below are still plain HTML/CSS —
-// <dialog>, showModal(), close() and the CSS transitions are all native. Vue's only
-// job here is holding a reference to the element so *something outside a click on
-// the trigger* (a script, an API response, another component) can open it too.
+// Everything below is native <dialog> + CSS; the ref only lets something outside a click
+// (a script, an API response, another component) open it too.
 const refDialogEl = useTemplateRef<HTMLDialogElement>('refDialog')
 
 function openRefDialog() {
@@ -86,8 +84,7 @@ function closeRefDialog() {
     </form>
   </dialog>
 
-  <!-- Nested modal: opened from a button inside info-dialog, sitting in the top
-       layer above it. Esc/backdrop-click closes only the topmost dialog first. -->
+  <!-- Nested modal: opened from inside info-dialog, stacked above it in the top layer. -->
   <dialog id="nested-dialog" closedby="any" class="modal modal--nested">
     <button type="button" class="modal-close" command="close" commandfor="nested-dialog" aria-label="Close">
       ×
@@ -105,10 +102,8 @@ function closeRefDialog() {
     </form>
   </dialog>
 
-  <!-- Vue-controlled: same native <dialog>/CSS as above, opened imperatively via a
-       template ref instead of a command/commandfor pair. Useful when the thing that
-       should open the modal isn't a click on a nearby button — e.g. a route change,
-       a validation failure, or a response coming back from an API call. -->
+  <!-- Vue-controlled: opened imperatively via a ref, for triggers that aren't a nearby
+       click (route change, validation failure, API response). -->
   <dialog id="ref-dialog" ref="refDialog" closedby="any" class="modal">
     <button type="button" class="modal-close" command="close" commandfor="ref-dialog" aria-label="Close">
       ×
@@ -169,7 +164,6 @@ function open() { refDialogEl.value?.showModal() }
   margin-block-end: 1.5rem;
 }
 
-/* --- the dialog itself --- */
 .modal {
   position: relative;
   border: 1px solid var(--border-strong);
@@ -180,8 +174,7 @@ function open() { refDialogEl.value?.showModal() }
   color: inherit;
   box-shadow: 0 20px 60px rgb(0 0 0 / 25%);
 
-  /* Entry/exit animation: transition overlay/display (allow-discrete) alongside
-     opacity/scale so the top-layer element animates in and out. */
+  /* overlay/display need allow-discrete to animate the top-layer element in/out. */
   opacity: 0;
   scale: 0.96;
   transition:
@@ -223,7 +216,6 @@ function open() { refDialogEl.value?.showModal() }
   }
 }
 
-/* the nested dialog gets a slightly darker backdrop so the stacking reads clearly */
 .modal--nested::backdrop {
   background: rgb(0 0 0 / 55%);
 }
@@ -231,7 +223,6 @@ function open() { refDialogEl.value?.showModal() }
 .modal h3 {
   margin-block: 0 0.6rem;
   padding-right: 1.5rem;
-  /* keep the title clear of the × button */
 }
 
 .modal p {
@@ -251,11 +242,7 @@ function open() { refDialogEl.value?.showModal() }
   margin-block-start: 1.1rem;
 }
 
-/* --- the X close button ---
-   Drawn as two crossed lines via ::before/::after rather than an "×" glyph:
-   font metrics vary enough by typeface that a text character rarely sits
-   dead-center in its box, especially at small sizes. Lines centered with
-   inset:0 + margin:auto are pixel-exact regardless of font. */
+/* Drawn as two crossed lines, not an "×" glyph — glyph metrics vary by font and rarely center. */
 .modal-close {
   position: absolute;
   top: 0.6rem;
@@ -269,7 +256,7 @@ function open() { refDialogEl.value?.showModal() }
   color: inherit;
   cursor: pointer;
   font-size: 0;
-  /* hide the × fallback character, kept in markup for a11y text */
+  /* hide the × fallback char, kept in markup for a11y */
 }
 
 .modal-close::before,

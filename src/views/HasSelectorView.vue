@@ -148,7 +148,6 @@ pre {
   margin-block-end: 0.25rem;
 }
 
-/* --- 1. rating --- */
 .rating {
   display: inline-flex;
   gap: 0.15rem;
@@ -183,7 +182,6 @@ pre {
   color: var(--accent);
 }
 
-/* --- 2. validation --- */
 .validation-demo {
   display: flex;
   gap: 1.25rem;
@@ -217,7 +215,6 @@ pre {
   border-color: color-mix(in srgb, seagreen 60%, var(--border-strong));
 }
 
-/* --- 3. plan cards --- */
 .plan-grid {
   display: flex;
   gap: 0.75rem;
@@ -248,7 +245,6 @@ pre {
   font-size: 0.9em;
 }
 
-/* --- 4. quantity query --- */
 .qty-controls {
   display: flex;
   gap: 0.6rem;
@@ -282,7 +278,6 @@ pre {
   font-size: 0.9em;
 }
 
-/* --- 5. content-aware post --- */
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

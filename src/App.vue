@@ -10,7 +10,6 @@
       <RouterLink to="/">Index</RouterLink>
       <span class="nav-group-label">CSS</span>
       <RouterLink to="/accordion">Accordion</RouterLink>
-      <RouterLink to="/data-table">Data table</RouterLink>
       <RouterLink to="/auto-grow-textarea">Auto-grow textarea</RouterLink>
       <RouterLink to="/position-try-fallbacks">Position-try fallbacks</RouterLink>
       <RouterLink to="/styled-select">Styled select</RouterLink>
@@ -26,6 +25,8 @@
       <RouterLink to="/temporal">Temporal</RouterLink>
       <RouterLink to="/iterator-helpers">Iterator helpers</RouterLink>
       <RouterLink to="/top-level-await">Top-level await</RouterLink>
+      <span class="nav-group-label">Showcase</span>
+      <RouterLink to="/data-table">Data table</RouterLink>
     </nav>
   </header>
 
