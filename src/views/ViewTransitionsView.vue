@@ -3,7 +3,9 @@ import { nextTick, ref, useTemplateRef, type ComponentPublicInstance } from 'vue
 import SupportBadge from '@/components/SupportBadge.vue'
 
 const hasViewTransitions = typeof document !== 'undefined' && 'startViewTransition' in document
-const doc = document as any
+const doc = document as Document & {
+  startViewTransition(cb: () => void | Promise<void>): { finished: Promise<void> }
+}
 
 type Layout = 'grid' | 'list'
 const layout = ref<Layout>('grid')

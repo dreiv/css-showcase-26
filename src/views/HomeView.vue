@@ -59,15 +59,6 @@ const demos: Demo[] = [
     supported: detect(() => typeof CSS !== 'undefined' && CSS.supports('appearance', 'none')),
   },
   {
-    name: 'Popover playground',
-    route: '/popover-playground',
-    technique: 'Popover API + anchor positioning',
-    description: 'Drag the anchor, pick a preferred side — the popover follows and self-flips.',
-    supported: detect(
-      () => typeof HTMLElement !== 'undefined' && 'popover' in HTMLElement.prototype,
-    ),
-  },
-  {
     name: 'Modal',
     route: '/modal',
     technique: 'command / commandfor',

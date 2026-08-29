@@ -17,7 +17,7 @@ export function useTableFilters() {
     let n = 0;
     if (selectedCategories.value.length !== categories.length) n++;
     if (inStockOnly.value) n++;
-    if (maxPrice.value) n++;
+    if (maxPrice.value !== null) n++;
     return n;
   });
 

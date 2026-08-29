@@ -46,7 +46,7 @@ const rows = computed(() => {
   const filtered = products.filter((p) => {
     if (!selectedCategories.value.includes(p.category)) return false
     if (inStockOnly.value && p.stock === 0) return false
-    if (maxPrice.value && p.price > maxPrice.value) return false
+    if (maxPrice.value !== null && p.price > maxPrice.value) return false
     return true
   })
 
