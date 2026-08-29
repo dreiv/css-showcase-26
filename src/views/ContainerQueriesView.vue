@@ -10,6 +10,7 @@
   </p>
 
   <div class="resize-wrap">
+    <span class="resize-hint" aria-hidden="true">⤡ drag to resize</span>
     <div class="container-demo">
       <article class="card">
         <div class="thumb" aria-hidden="true"></div>
@@ -38,6 +39,43 @@
   }
 }</code></pre>
 
+  <h2>Same component, different containers</h2>
+  <p class="description">
+    The most common real use of this: drop the <em>exact same</em> card into a narrow sidebar and
+    a wide main column and let each reflow on its own — no <code>.card--compact</code> override
+    class, no JS measuring the parent's <code>offsetWidth</code>. Both cards below share one
+    <code>.card</code> rule; only their container's width differs.
+  </p>
+
+  <div class="layout-demo">
+    <aside class="pane pane--narrow">
+      <p class="pane-label">Sidebar · 200px</p>
+      <article class="card">
+        <div class="thumb" aria-hidden="true"></div>
+        <div class="body">
+          <h3>Container-aware card</h3>
+          <p>Same markup, same CSS, stacked because there's no room.</p>
+          <button type="button">Read more</button>
+        </div>
+      </article>
+    </aside>
+
+    <div class="pane pane--wide">
+      <p class="pane-label">Main column · 480px</p>
+      <article class="card">
+        <div class="thumb" aria-hidden="true"></div>
+        <div class="body">
+          <h3>Container-aware card</h3>
+          <p>Same markup, same CSS — it switches to side-by-side once there's room.</p>
+          <button type="button">Read more</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <pre><code>.pane { container-type: inline-size; container-name: card-container; }
+/* both panes reuse the same named container and the same @container rule above */</code></pre>
+
   <h2>Container query units</h2>
   <p class="description">
     <code>cqi</code>/<code>cqw</code> scale with the container's inline size the way
@@ -46,6 +84,7 @@
   </p>
 
   <div class="resize-wrap resize-wrap--unit">
+    <span class="resize-hint" aria-hidden="true">⤡ drag to resize</span>
     <div class="unit-demo">
       <h3 class="cq-heading">Scales with me</h3>
     </div>
@@ -63,6 +102,7 @@ h2:not(:first-child) {
 
 /* The drag handle is just the browser's native `resize` — no JS pointer tracking. */
 .resize-wrap {
+  position: relative;
   resize: horizontal;
   overflow: auto;
   width: 100%;
@@ -72,6 +112,22 @@ h2:not(:first-child) {
   border-radius: var(--radius);
   padding: 0.75rem;
   margin-block-end: 1.5rem;
+}
+
+.resize-hint {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+  background: var(--surface);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  pointer-events: none;
+  user-select: none;
 }
 
 .container-demo {
@@ -111,6 +167,38 @@ h2:not(:first-child) {
     grid-template-columns: 140px 1fr;
     align-items: center;
   }
+}
+
+.layout-demo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block-end: 1.5rem;
+}
+
+.pane {
+  container-type: inline-size;
+  container-name: card-container;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+}
+
+.pane--narrow {
+  width: 200px;
+}
+
+.pane--wide {
+  width: 480px;
+  max-width: 100%;
+  flex: 1 1 480px;
+}
+
+.pane-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75em;
+  font-weight: 600;
+  color: color-mix(in srgb, currentColor 60%, transparent);
 }
 
 .unit-demo {

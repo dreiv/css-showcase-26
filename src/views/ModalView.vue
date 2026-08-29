@@ -1,8 +1,23 @@
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import SupportBadge from '@/components/SupportBadge.vue'
 
 const hasInvokerCommands =
   typeof HTMLButtonElement !== 'undefined' && 'command' in HTMLButtonElement.prototype
+
+// The markup, styling and open/close mechanics below are still plain HTML/CSS —
+// <dialog>, showModal(), close() and the CSS transitions are all native. Vue's only
+// job here is holding a reference to the element so *something outside a click on
+// the trigger* (a script, an API response, another component) can open it too.
+const refDialogEl = useTemplateRef<HTMLDialogElement>('refDialog')
+
+function openRefDialog() {
+  refDialogEl.value?.showModal()
+}
+
+function closeRefDialog() {
+  refDialogEl.value?.close()
+}
 </script>
 
 <template>
@@ -24,9 +39,14 @@ const hasInvokerCommands =
     <button type="button" command="show-modal" commandfor="confirm-dialog">Delete project…</button>
 
     <button type="button" command="show-modal" commandfor="info-dialog">Show details</button>
+
+    <button type="button" @click="openRefDialog">Open via Vue ref</button>
   </div>
 
   <dialog id="confirm-dialog" closedby="any" class="modal modal--danger">
+    <button type="button" class="modal-close" command="close" commandfor="confirm-dialog" aria-label="Close">
+      ×
+    </button>
     <form method="dialog">
       <h3>Delete "css-showcase-26"?</h3>
       <p>This can't be undone. The repo and its history will be permanently removed.</p>
@@ -40,6 +60,9 @@ const hasInvokerCommands =
   </dialog>
 
   <dialog id="info-dialog" closedby="any" class="modal">
+    <button type="button" class="modal-close" command="close" commandfor="info-dialog" aria-label="Close">
+      ×
+    </button>
     <form method="dialog">
       <h3>Why <code>command</code>/<code>commandfor</code>?</h3>
       <p>
@@ -55,7 +78,51 @@ const hasInvokerCommands =
         JS, for anything beyond open/close.
       </p>
       <div class="modal-actions">
+        <button type="button" command="show-modal" commandfor="nested-dialog">
+          Show advanced settings…
+        </button>
         <button type="submit" command="close" commandfor="info-dialog">Got it</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Nested modal: opened from a button inside info-dialog, sitting in the top
+       layer above it. Esc/backdrop-click closes only the topmost dialog first. -->
+  <dialog id="nested-dialog" closedby="any" class="modal modal--nested">
+    <button type="button" class="modal-close" command="close" commandfor="nested-dialog" aria-label="Close">
+      ×
+    </button>
+    <form method="dialog">
+      <h3>Advanced settings</h3>
+      <p>
+        A second <code>&lt;dialog&gt;</code>, opened on top of the first with its own
+        <code>command="show-modal"</code> trigger. Both live in the browser's top layer, so
+        stacking, backdrop and focus trapping all come free — no z-index juggling.
+      </p>
+      <div class="modal-actions">
+        <button type="submit" command="close" commandfor="nested-dialog">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Vue-controlled: same native <dialog>/CSS as above, opened imperatively via a
+       template ref instead of a command/commandfor pair. Useful when the thing that
+       should open the modal isn't a click on a nearby button — e.g. a route change,
+       a validation failure, or a response coming back from an API call. -->
+  <dialog id="ref-dialog" ref="refDialog" closedby="any" class="modal">
+    <button type="button" class="modal-close" command="close" commandfor="ref-dialog" aria-label="Close">
+      ×
+    </button>
+    <form method="dialog">
+      <h3>Controlled via template ref</h3>
+      <p>
+        Opened by calling <code>refDialogEl.value.showModal()</code> from
+        <code>&lt;script setup&gt;</code>. Notice the close button above still uses
+        <code>command="close" commandfor="ref-dialog"</code> — declarative close works fine
+        regardless of how the dialog was opened, since it's the same native element either way.
+      </p>
+      <div class="modal-actions">
+        <button type="button" @click="closeRefDialog">Close via ref</button>
       </div>
     </form>
   </dialog>
@@ -65,18 +132,32 @@ const hasInvokerCommands =
 &lt;/button&gt;
 
 &lt;dialog id="confirm-dialog" closedby="any"&gt;
+  &lt;button class="modal-close" command="close" commandfor="confirm-dialog"&gt;×&lt;/button&gt;
   &lt;form method="dialog"&gt;
     …
     &lt;button command="close" commandfor="confirm-dialog"&gt;Cancel&lt;/button&gt;
   &lt;/form&gt;
-&lt;/dialog&gt;</code></pre>
+&lt;/dialog&gt;
+
+&lt;!-- nested: a trigger living inside another dialog --&gt;
+&lt;button command="show-modal" commandfor="nested-dialog"&gt;Show advanced settings…&lt;/button&gt;
+&lt;dialog id="nested-dialog" closedby="any"&gt;…&lt;/dialog&gt;
+
+&lt;!-- Vue-controlled --&gt;
+&lt;script setup&gt;
+const refDialogEl = useTemplateRef('refDialog')
+function open() { refDialogEl.value?.showModal() }
+&lt;/script&gt;
+
+&lt;dialog ref="refDialog" id="ref-dialog"&gt;…&lt;/dialog&gt;</code></pre>
 
   <p class="support-note">
     <code>command</code>/<code>commandfor</code> shipped in Chromium first, so the badge above may
     read differently depending on which browser opened this page — if it's unsupported, the buttons
     above are inert no-ops. Pair with a tiny progressive-enhancement JS fallback (feature-detect
     <code>"command" in HTMLButtonElement.prototype</code>, same check the badge uses) if you need
-    this working everywhere today.
+    this working everywhere today. The ref-controlled dialog's <code>showModal()</code>/
+    <code>close()</code> calls are plain DOM methods and work regardless of that support.
   </p>
 </template>
 
@@ -90,6 +171,7 @@ const hasInvokerCommands =
 
 /* --- the dialog itself --- */
 .modal {
+  position: relative;
   border: 1px solid var(--border-strong);
   border-radius: 1rem;
   padding: 1.4rem 1.6rem;
@@ -141,8 +223,15 @@ const hasInvokerCommands =
   }
 }
 
+/* the nested dialog gets a slightly darker backdrop so the stacking reads clearly */
+.modal--nested::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
 .modal h3 {
   margin-block: 0 0.6rem;
+  padding-right: 1.5rem;
+  /* keep the title clear of the × button */
 }
 
 .modal p {
@@ -157,8 +246,58 @@ const hasInvokerCommands =
 .modal-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.6rem;
   margin-block-start: 1.1rem;
+}
+
+/* --- the X close button ---
+   Drawn as two crossed lines via ::before/::after rather than an "×" glyph:
+   font metrics vary enough by typeface that a text character rarely sits
+   dead-center in its box, especially at small sizes. Lines centered with
+   inset:0 + margin:auto are pixel-exact regardless of font. */
+.modal-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0;
+  /* hide the × fallback character, kept in markup for a11y text */
+}
+
+.modal-close::before,
+.modal-close::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 0.8rem;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.modal-close::before {
+  rotate: 45deg;
+}
+
+.modal-close::after {
+  rotate: -45deg;
+}
+
+.modal-close:hover {
+  background: var(--surface-hover);
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .danger {

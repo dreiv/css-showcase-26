@@ -29,20 +29,58 @@ const items = [
 
   <SupportBadge :supported="hasDetailsContent" feature="::details-content" />
 
-  <div class="accordion">
-    <details v-for="(item, i) in items" :key="item.q" class="accordion-item" :open="i === 0">
-      <summary class="summary">
-        <span class="nr">{{ String(i + 1).padStart(2, '0') }}</span>
-        {{ item.q }}
-      </summary>
-      <div class="clip">
-        <p>{{ item.a }}</p>
+  <div class="compare">
+    <div class="col">
+      <h3>With <code>::details-content</code></h3>
+      <div class="accordion">
+        <details v-for="(item, i) in items" :key="item.q" class="accordion-item enhanced" :open="i === 0">
+          <summary class="summary">
+            <span class="nr">{{ String(i + 1).padStart(2, '0') }}</span>
+            {{ item.q }}
+          </summary>
+          <div class="clip">
+            <p>{{ item.a }}</p>
+          </div>
+        </details>
       </div>
-    </details>
+    </div>
+
+    <div class="col">
+      <h3>Default details</h3>
+      <div class="accordion">
+        <details v-for="(item, i) in items" :key="item.q" class="accordion-item" :open="i === 0">
+          <summary class="summary">
+            <span class="nr">{{ String(i + 1).padStart(2, '0') }}</span>
+            {{ item.q }}
+          </summary>
+          <div class="clip">
+            <p>{{ item.a }}</p>
+          </div>
+        </details>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-block-end: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .compare {
+    grid-template-columns: 1fr;
+  }
+}
+
+h3 {
+  font-size: 0.95rem;
+  margin-block: 0 0.5rem;
+}
+
 .accordion {
   display: flex;
   flex-direction: column;
@@ -69,14 +107,21 @@ const items = [
 }
 
 .summary::after {
-  content: '⌄';
+  content: '';
   margin-inline-start: auto;
-  font-size: 1.1em;
-  transition: rotate 0.25s ease;
+  width: 0.55em;
+  height: 0.55em;
+  flex-shrink: 0;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -15%;
+  transition: rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .accordion-item[open] .summary::after {
-  rotate: 180deg;
+  rotate: -135deg;
+  translate: 0 15%;
 }
 
 .nr {
@@ -105,7 +150,7 @@ const items = [
 }
 
 /* --- the actual trick: animate a grid track instead of height --- */
-.accordion-item::details-content {
+.enhanced::details-content {
   display: grid;
   grid-template-rows: 0fr;
   content-visibility: hidden;
@@ -114,7 +159,7 @@ const items = [
     content-visibility 0.35s allow-discrete;
 }
 
-.accordion-item[open]::details-content {
+.enhanced[open]::details-content {
   grid-template-rows: 1fr;
   content-visibility: visible;
 }

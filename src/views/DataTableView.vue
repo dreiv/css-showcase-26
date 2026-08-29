@@ -114,9 +114,7 @@ const notedProductIds = new Set([2, 3])
           <th v-for="(col, i) in columns" :key="col.key" :class="{ pin: i === 0 }" :aria-sort="ariaSort(col.key)">
             <button type="button" class="sort-btn" @click="toggleSort(col.key)">
               {{ col.label }}
-              <span v-if="sortKey === col.key" class="arrow">{{
-                sortDir === 'asc' ? '↑' : '↓'
-                }}</span>
+              <span v-if="sortKey === col.key" class="arrow"> {{ sortDir === 'asc' ? '↑' : '↓' }}</span>
             </button>
           </th>
         </tr>
@@ -230,9 +228,14 @@ const notedProductIds = new Set([2, 3])
   font-size: 0.9em;
 }
 
+.filter-popover input[type='checkbox'] {
+  accent-color: var(--accent);
+}
+
 .row-field input[type='number'] {
   width: 6rem;
   margin-inline-start: auto;
+  accent-color: var(--accent);
 }
 
 .clear-btn {
@@ -300,6 +303,11 @@ const notedProductIds = new Set([2, 3])
   background: var(--surface-hover);
 }
 
+.note-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* Anchor to the trigger only where supported; elsewhere the popovers fall back
    to the browser's default centered position. */
 @supports (anchor-name: --a) {
@@ -350,10 +358,16 @@ const notedProductIds = new Set([2, 3])
   align-items: center;
   gap: 0.3rem;
   font-weight: 600;
+  border-radius: 0.25rem;
 }
 
 .sort-btn:hover {
   text-decoration: underline;
+}
+
+.sort-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .arrow {
@@ -370,6 +384,8 @@ const notedProductIds = new Set([2, 3])
   max-height: 22rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .data-table {
@@ -390,6 +406,7 @@ const notedProductIds = new Set([2, 3])
   left: 0;
   background: canvas;
   z-index: 1;
+  border-inline-end: 1px solid var(--border);
 }
 
 .data-table thead .pin {
@@ -398,5 +415,23 @@ const notedProductIds = new Set([2, 3])
 
 .data-table tbody tr:hover>* {
   background: var(--surface);
+}
+
+@supports (animation-timeline: scroll()) {
+  .data-table .pin {
+    animation: reveal-pin-shadow linear both;
+    animation-timeline: scroll(inline nearest);
+    animation-range: 0 24px;
+  }
+}
+
+@keyframes reveal-pin-shadow {
+  from {
+    box-shadow: 6px 0 8px -6px transparent;
+  }
+
+  to {
+    box-shadow: 6px 0 8px -6px rgb(0 0 0 / 25%);
+  }
 }
 </style>

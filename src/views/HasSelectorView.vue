@@ -15,23 +15,24 @@ function removeItem() {
   <h2>:has() — the "parent selector"</h2>
   <p class="description">
     <code>:has()</code> matches an element if a selector inside it matches something —
-    effectively letting CSS reach "upward" or "sideways" for the first time. Five different jobs
+    effectively letting CSS reach "upward" or "sideways" for the first time. Six different jobs
     below, all the same primitive.
   </p>
 
   <h3>1. Star rating (sibling state, no JS)</h3>
   <p class="mini">
-    Hovering a star highlights it <em>and every star before it</em>, using
-    <code>:has(~ .star:hover)</code> on each preceding label. Same trick powers the checked state.
+    Hovering a star highlights it <em>and every star before it</em> — normally impossible with
+    plain CSS, since sibling combinators only reach forward. <code>:has(~ .star:hover)</code>
+    lets each star check its later siblings and light up if any of them are hovered.
   </p>
   <fieldset class="rating" aria-label="Rate this demo">
-    <template v-for="n in [5, 4, 3, 2, 1]" :key="n">
+    <template v-for="n in [1, 2, 3, 4, 5]" :key="n">
       <input type="radio" name="rating" :id="`star-${n}`" :value="n" class="star-input" />
       <label :for="`star-${n}`" class="star" :aria-label="`${n} star${n > 1 ? 's' : ''}`">★</label>
     </template>
   </fieldset>
-  <pre><code>/* light up this star, plus every star that comes after it in the DOM
-    (which is visually *before* it, thanks to flex-direction: row-reverse) */
+  <pre><code>/* light up this star if it's hovered, or if any star after it in the
+    DOM (i.e. to its right) is hovered */
     .star:has(~ .star:hover),
     .star:hover {
     color: var(--accent);
@@ -107,7 +108,7 @@ function removeItem() {
     same component, no modifier class needed.
   </p>
   <div class="content-grid">
-    <article class="post has-media">
+    <article class="post">
       <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=240&q=60" alt="" loading="lazy" />
       <div>
         <h4>With a cover image</h4>
@@ -124,6 +125,7 @@ function removeItem() {
   <pre><code>.post:has(img) {
     grid-template-columns: 96px 1fr;
     }</code></pre>
+
 </template>
 
 <style scoped>
@@ -149,7 +151,6 @@ pre {
 /* --- 1. rating --- */
 .rating {
   display: inline-flex;
-  flex-direction: row-reverse;
   gap: 0.15rem;
   border: none;
   padding: 0;
@@ -177,8 +178,8 @@ pre {
   color: var(--accent);
 }
 
-.star-input:checked+.star,
-.star-input:checked+.star~.star {
+.star:has(~ .star-input:checked),
+.star-input:checked+.star {
   color: var(--accent);
 }
 
@@ -303,7 +304,7 @@ pre {
   padding: 0.9rem;
 }
 
-.post.has-media:has(img) {
+.post:has(img) {
   grid-template-columns: 96px 1fr;
   align-items: center;
 }

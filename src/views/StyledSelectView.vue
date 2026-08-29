@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const compareValue = ref('medium')
+
 const size = ref('medium')
+const status = ref('in-progress')
 const country = ref('')
 </script>
 
@@ -14,6 +17,32 @@ const country = ref('')
     (<code>appearance: base-select</code>) which lets you style the open dropdown too, but is
     currently Chromium-only.
   </p>
+
+  <div class="compare">
+    <div class="col">
+      <h3>Default select</h3>
+      <select v-model="compareValue">
+        <option value="small">Small</option>
+        <option value="medium">Medium</option>
+        <option value="large">Large</option>
+      </select>
+    </div>
+
+    <div class="col">
+      <h3>Styled select</h3>
+      <span class="select-wrap">
+        <select v-model="compareValue" class="styled-select">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </span>
+    </div>
+  </div>
+
+  <p class="note">Same <code>v-model</code>, same options — only the CSS differs.</p>
+
+  <h3 class="examples-heading">More examples</h3>
 
   <div class="demo-row">
     <label class="field">
@@ -28,21 +57,57 @@ const country = ref('')
     </label>
 
     <label class="field">
+      Status
+      <span class="select-wrap status-wrap" :class="`status-${status}`">
+        <select v-model="status" class="styled-select status-select">
+          <option value="todo">To do</option>
+          <option value="in-progress">In progress</option>
+          <option value="blocked">Blocked</option>
+          <option value="done">Done</option>
+        </select>
+      </span>
+    </label>
+
+    <label class="field">
       Country
       <span class="select-wrap">
         <select v-model="country" class="styled-select">
           <option value="" disabled>Choose one</option>
-          <option value="ro">Romania</option>
-          <option value="de">Germany</option>
-          <option value="fr">France</option>
-          <option value="jp">Japan</option>
+          <optgroup label="Europe">
+            <option value="ro">Romania</option>
+            <option value="de">Germany</option>
+            <option value="fr">France</option>
+          </optgroup>
+          <optgroup label="Asia">
+            <option value="jp">Japan</option>
+            <option value="kr">South Korea</option>
+          </optgroup>
+          <optgroup label="Americas">
+            <option value="us">United States</option>
+            <option value="br">Brazil</option>
+          </optgroup>
         </select>
       </span>
     </label>
   </div>
 
   <p class="note">
-    Selected: <strong>{{ size }}</strong>{{ country ? `, ${country}` : '' }}
+    Selected: <strong>{{ size }}</strong>, <strong>{{ status }}</strong>{{ country ? `, ${country}` : '' }}
+  </p>
+
+  <p class="explainer">
+    The status select shows a common real-world pattern: a colored dot baked into the wrapper
+    that reflects the current value, so the field communicates state at a glance without
+    needing custom-drawn options. The country select uses native <code>&lt;optgroup&gt;</code>
+    to bucket a long list — still just a plain <code>&lt;select&gt;</code>, no JS required.
+  </p>
+
+  <p class="explainer">
+    Note the ceiling of this technique: once the dropdown is open, that popup is rendered by the
+    browser, not by your CSS. You can set <code>option</code> and <code>optgroup</code> colors,
+    but the hover/selected-row highlight is UA-controlled — in Chromium it stays a plain gray, no
+    matter what you set. Restyling that highlight is exactly what
+    <code>appearance: base-select</code> is for.
   </p>
 
   <pre><code>.select-wrap {
@@ -69,10 +134,51 @@ const country = ref('')
 .styled-select {
   appearance: none;
   padding-right: 2rem; /* room for the arrow */
+}
+
+/* status dot: a colored circle layered in alongside the arrow */
+.status-wrap::before {
+  content: '';
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  translate: 0 -50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--status-color);
+  pointer-events: none;
 }</code></pre>
 </template>
 
 <style scoped>
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-block-end: 1rem;
+}
+
+@media (max-width: 640px) {
+  .compare {
+    grid-template-columns: 1fr;
+  }
+}
+
+.col h3 {
+  font-size: 0.95rem;
+  margin-block: 0 0.5rem;
+}
+
+.col select {
+  width: 100%;
+}
+
+.examples-heading {
+  font-size: 0.95rem;
+  margin-block: 1.5rem 0.75rem;
+}
+
 .demo-row {
   display: flex;
   flex-wrap: wrap;
@@ -124,9 +230,15 @@ const country = ref('')
   color-scheme: light dark;
 }
 
-.styled-select option {
+.styled-select option,
+.styled-select optgroup {
   color: CanvasText;
   background-color: Canvas;
+}
+
+.styled-select optgroup {
+  font-style: normal;
+  font-weight: 600;
 }
 
 .styled-select:hover {
@@ -144,8 +256,51 @@ const country = ref('')
   text-shadow: 0 0 0 currentColor;
 }
 
+/* status select: colored dot on the left, driven by a CSS var per state */
+.status-wrap {
+  --status-color: var(--border-strong);
+}
+
+.status-wrap.status-todo {
+  --status-color: #9ca3af;
+}
+
+.status-wrap.status-in-progress {
+  --status-color: #3b82f6;
+}
+
+.status-wrap.status-blocked {
+  --status-color: #ef4444;
+}
+
+.status-wrap.status-done {
+  --status-color: #22c55e;
+}
+
+.status-wrap::before {
+  content: '';
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  translate: 0 -50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--status-color);
+  pointer-events: none;
+}
+
+.status-select {
+  padding-left: 1.65rem;
+}
+
 .note {
   color: color-mix(in srgb, currentColor 65%, transparent);
   font-size: 0.9em;
+}
+
+.explainer {
+  font-size: 0.9em;
+  margin-block-end: 1.25rem;
 }
 </style>
